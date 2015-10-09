@@ -28,12 +28,21 @@ namespace AlumnoEjemplos.MiGrupo
             
              //Moto
              TgcMesh motorcycle;
-
+                 //movimiento
+                 float tiempoAcelerando = 0f;
+                 float tiempoDescelerando = 0f;
+                 float velIni = 0f;
+                 bool motoRota;
+                 float tiempoRota;
              //collisions
              TgcElipsoid characterElipsoid;
              List<Collider> objetosColisionables = new List<Collider>();
              ElipsoidCollisionManager collisionManager;
-            
+            bool tocandoPiso = false;
+            Vector3 ultimoMov = new Vector3(0,0,0);
+           //  bool terminoDeSaltar = true;
+            // int framesParaSaltar = 50;
+             
              //Ciudad
              TgcScene scene;
 
@@ -95,8 +104,15 @@ namespace AlumnoEjemplos.MiGrupo
             string texturesPath = GuiController.Instance.ExamplesMediaDir + "Texturas\\Quake\\SkyBox1\\";
             TgcSceneLoader loader = new TgcSceneLoader();
             collisionManager = new ElipsoidCollisionManager();
-            collisionManager.GravityEnabled = true;
-           
+            collisionManager.GravityEnabled = false;
+            tiempoAcelerando = 0f;
+            tiempoDescelerando = 0f;
+            velIni = 0f;
+            tocandoPiso = false;
+            ultimoMov = new Vector3(0, 0, 0);
+            motoRota = false;
+            tiempoRota = 0f;
+
             //skybox
             inicializarSkybox(texturesPath);
             
@@ -105,17 +121,21 @@ namespace AlumnoEjemplos.MiGrupo
 
             //cargo la moto
             motorcycle = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "moto\\Moto2-TgcScene.xml").Meshes[0];
-            motorcycle.move(0, 1000, 500);
+            motorcycle.move(0, 100
+                , 700);
            
             //camara
             GuiController.Instance.ThirdPersonCamera.Enable = true;
-            GuiController.Instance.ThirdPersonCamera.setCamera(motorcycle.Position, 10, 250);
+            GuiController.Instance.ThirdPersonCamera.setCamera(motorcycle.Position, 10, 175);
             GuiController.Instance.ThirdPersonCamera.rotateY(-1.57f);
 
             //creo la bounding elipsoid
+
+            motorcycle.Scale = new Vector3(0.5f, 0.5f, 0.5f);
+
             motorcycle.AutoUpdateBoundingBox = false;
-            characterElipsoid = new TgcElipsoid(motorcycle.BoundingBox.calculateBoxCenter() + new Vector3(0, 0, 0), new Vector3(23 ,23,23));
-            
+            characterElipsoid = new TgcElipsoid(motorcycle.BoundingBox.calculateBoxCenter() + new Vector3(0, 0, 0), new Vector3(23, 23, 23) * 0.5f);
+           
             //cargo los colliders
             objetosColisionables.Clear();
             foreach (TgcMesh mesh in scene.Meshes)
@@ -136,20 +156,29 @@ namespace AlumnoEjemplos.MiGrupo
             //Modifier para ver BoundingBox
             GuiController.Instance.Modifiers.addBoolean("Collisions", "Collisions", true);
             GuiController.Instance.Modifiers.addBoolean("showBoundingBox", "Bouding Box", true);
+            GuiController.Instance.Modifiers.addBoolean("HabilitarGravedad", "Habilitar Gravedad", true);
 
             //Modifiers para desplazamiento del personaje
-            GuiController.Instance.Modifiers.addFloat("VelocidadCaminar", 0, 20, 2);
-            GuiController.Instance.Modifiers.addFloat("VelocidadRotacion", 1f, 360f, 150f);
-            GuiController.Instance.Modifiers.addBoolean("HabilitarGravedad", "Habilitar Gravedad", true);
-            GuiController.Instance.Modifiers.addVertex3f("Gravedad", new Vector3(-50, -50, -50), new Vector3(50, 50, 50), new Vector3(0, -1, 0));
-            GuiController.Instance.Modifiers.addFloat("SlideFactor", 0f, 25f, 1f);
-            GuiController.Instance.Modifiers.addFloat("Pendiente", 0f, 10f, 0.72f);
-            GuiController.Instance.Modifiers.addFloat("VelocidadSalto", 0f, 50f, 10f);
-            GuiController.Instance.Modifiers.addFloat("TiempoSalto", 0f, 2f, 0.5f);
+            GuiController.Instance.Modifiers.addFloat("VelocidadMax", 0f, 100f, 20f);
+            GuiController.Instance.Modifiers.addFloat("Aceleracion", 0f, 10f, 0.5f);
 
+            GuiController.Instance.Modifiers.addFloat("Rozamiento", 0.1f, 2f, 0.1f);
+            GuiController.Instance.Modifiers.addFloat("VelocidadRotacion", 1f,500f, 300f);
+            GuiController.Instance.Modifiers.addVertex3f("Gravedad", new Vector3(-50, -50, -50), new Vector3(50, 50, 50), new Vector3(0, -0.3f, 0));
 
+            GuiController.Instance.Modifiers.addFloat("SlideFactor", 0f, 10f, 1f);
+            GuiController.Instance.Modifiers.addFloat("Pendiente", 0f, 1f, 0.72f);
+           
             GuiController.Instance.UserVars.addVar("Movement");
-            GuiController.Instance.UserVars.addVar("Angulo");
+            GuiController.Instance.UserVars.addVar("AnguloZ");
+            GuiController.Instance.UserVars.addVar("AnguloY");
+
+            GuiController.Instance.UserVars.addVar("moveForward");
+            GuiController.Instance.UserVars.addVar("velIni");
+            GuiController.Instance.UserVars.addVar("aceleracion");
+            GuiController.Instance.UserVars.addVar("tiempoAcel");
+            GuiController.Instance.UserVars.addVar("tiempoDesce");
+
 
 
             //DEBUG
@@ -192,124 +221,254 @@ namespace AlumnoEjemplos.MiGrupo
             TgcD3dInput d3dInput = GuiController.Instance.D3dInput;
 
             var original_pos = motorcycle.Position;
+            var original_rot = motorcycle.Rotation;
 
-            //Obtener boolean para saber si hay que mostrar Bounding Box
+           
             bool showBB = (bool)GuiController.Instance.Modifiers.getValue("showBoundingBox");
-
-
-            //obtener velocidades de Modifiers
-            float velocidadCaminar = (float)GuiController.Instance.Modifiers.getValue("VelocidadCaminar");
-            float velocidadRotacion = (float)GuiController.Instance.Modifiers.getValue("VelocidadRotacion");
-            float velocidadSalto = (float)GuiController.Instance.Modifiers.getValue("VelocidadSalto");
-            float tiempoSalto = (float)GuiController.Instance.Modifiers.getValue("TiempoSalto");
-
-
-            //Calcular proxima posicion de personaje segun Input
-            float moveForward = 0f;
+            float aceleracion = 0f;
+            float moveForward=0f;
             float rotate = 0;
             bool moving = false;
             bool rotating = false;
+            float aceleracionVar = (float)GuiController.Instance.Modifiers.getValue("Aceleracion");
+            float velMax = (float)GuiController.Instance.Modifiers.getValue("VelocidadMax");
+            float rozamiento = (float)GuiController.Instance.Modifiers.getValue("Rozamiento");
+            float velocidadRotacion = (float)GuiController.Instance.Modifiers.getValue("VelocidadRotacion");
 
-            //Adelante
-            if (d3dInput.keyDown(Key.W))
-            {
-                moveForward = -velocidadCaminar;
-                moving = true;
-            }
 
-            //Atras
-            if (d3dInput.keyDown(Key.S))
+            if (motoRota)
             {
-                moveForward = velocidadCaminar;
-                moving = true;
-            }
-
-            //Derecha
-            if (d3dInput.keyDown(Key.D))
-            {
-                rotate = -velocidadRotacion;
-                rotating = true;
-            }
-
-            //Izquierda
-            if (d3dInput.keyDown(Key.A))
-            {
-                rotate = velocidadRotacion;
-                rotating = true;
-            }
-
-            //ROTACION
-            if (rotating)
-            {
-                //Rotar personaje y la camara, hay que multiplicarlo por el tiempo transcurrido para no atarse a la velocidad el hardware
-                float rotAngle = Geometry.DegreeToRadian(rotate * elapsedTime);
-                motorcycle.rotateX(rotAngle);
-            }
-            
-            //Actualizar valores de gravedad
-            collisionManager.GravityEnabled = (bool)GuiController.Instance.Modifiers["HabilitarGravedad"];
-            collisionManager.GravityForce = (Vector3)GuiController.Instance.Modifiers["Gravedad"] /** elapsedTime*/;
-            collisionManager.SlideFactor = (float)GuiController.Instance.Modifiers["SlideFactor"];
-            collisionManager.OnGroundMinDotValue = (float)GuiController.Instance.Modifiers["Pendiente"];
-
-            //CALCULO VECTOR MOVIMIENTO
-            Vector3 movementVector = Vector3.Empty;
-            if (moving)
-            {
-                //Aplicar movimiento, desplazarse en base a la rotacion actual del personaje
-                movementVector = new Vector3(
-                    FastMath.Sin(motorcycle.Rotation.Y) * moveForward,
-                    0,
-                    FastMath.Cos(motorcycle.Rotation.Y) * moveForward
-                    );
-            }
-            Vector3 realMovement = movementVector;
-            //MOVIMIENTO EN SI guarda en realMovement el movimiento que no colisiona
-            if ((bool)GuiController.Instance.Modifiers["Collisions"])
-            {
-                realMovement = collisionManager.moveCharacter(characterElipsoid, movementVector, objetosColisionables);
-                motorcycle.move(realMovement);
-
-                //Cargar desplazamiento realizar en UserVar
-                GuiController.Instance.UserVars.setValue("Movement", TgcParserUtils.printVector3(realMovement));
+                tiempoRota += elapsedTime;
+                if (tiempoRota > 5f)
+                {
+                    init();
+                }
             }
             else
             {
-                motorcycle.move(movementVector);
+
+                if (d3dInput.keyUp(Key.W))
+                {
+                    tiempoAcelerando = 0f;
+                }
+
+                if (d3dInput.keyUp(Key.S))
+                {
+                    tiempoDescelerando = 0f;
+                }
+
+
+
+                //Adelante
+                if (d3dInput.keyDown(Key.W) && tocandoPiso)
+                {
+                    aceleracion = aceleracionVar;
+                    moveForward = -aceleracion * tiempoAcelerando + velIni;
+                    if (moveForward < -velMax)
+                    {
+                        moveForward = -velMax;
+                    }
+                    velIni = moveForward;
+                    tiempoAcelerando += elapsedTime;
+                    tiempoDescelerando = 0f;
+
+                }
+
+                //Atras
+                if (d3dInput.keyDown(Key.S) && tocandoPiso)
+                {
+                    aceleracion = -aceleracionVar;
+                    moveForward = -aceleracion * tiempoDescelerando + velIni;
+                    if (moveForward > velMax / 2)
+                    {
+                        moveForward = velMax / 2;
+                    }
+                    velIni = moveForward;
+                    tiempoDescelerando += elapsedTime;
+                    tiempoAcelerando = 0f;
+                }
+
+                if ((!d3dInput.keyDown(Key.S) && !d3dInput.keyDown(Key.W)) || !tocandoPiso)
+                {
+                    aceleracion = 0f;
+                    moveForward = velIni;
+
+                }
+
+                if (moveForward != 0 && tocandoPiso)
+                {
+                    if (moveForward < 0)
+                    {
+                        moveForward += rozamiento;
+                    }
+                    if (moveForward > 0)
+                    {
+                        moveForward -= rozamiento;
+                    }
+                    velIni = moveForward;
+                }
+                if (moveForward >= rozamiento || moveForward <= -rozamiento)
+                {
+                    moving = true;
+                }
+                else
+                {
+                    moveForward = 0;
+                    velIni = moveForward;
+                }
+
+
+
+                GuiController.Instance.UserVars.setValue("moveForward", TgcParserUtils.printFloat(moveForward));
+                GuiController.Instance.UserVars.setValue("velIni", TgcParserUtils.printFloat(velIni));
+                GuiController.Instance.UserVars.setValue("aceleracion", TgcParserUtils.printFloat(aceleracion));
+                GuiController.Instance.UserVars.setValue("tiempoAcel", TgcParserUtils.printFloat(tiempoAcelerando));
+                GuiController.Instance.UserVars.setValue("tiempoDesce", TgcParserUtils.printFloat(tiempoDescelerando));
+
+
+
+                //Derecha
+                if (d3dInput.keyDown(Key.D)&&!tocandoPiso)
+                {
+                    rotate = -velocidadRotacion;
+                    rotating = true;
+                }
+
+                //Izquierda
+                if (d3dInput.keyDown(Key.A)&&!tocandoPiso)
+                {
+                    rotate = velocidadRotacion;
+                    rotating = true;
+                }
+
+                //ROTACION
+                if (rotating)
+                {
+                    //Rotar personaje y la camara, hay que multiplicarlo por el tiempo transcurrido para no atarse a la velocidad el hardware
+                    float rotAngle = Geometry.DegreeToRadian(rotate * elapsedTime);
+                    motorcycle.rotateX(rotAngle);
+                }
+
+                //Actualizar valores de gravedad
+                collisionManager.GravityEnabled = (bool)GuiController.Instance.Modifiers["HabilitarGravedad"];
+                collisionManager.GravityForce = (Vector3)GuiController.Instance.Modifiers["Gravedad"] /** elapsedTime*/;
+                collisionManager.SlideFactor = (float)GuiController.Instance.Modifiers["SlideFactor"];
+                collisionManager.OnGroundMinDotValue = (float)GuiController.Instance.Modifiers["Pendiente"];
+
+                //CALCULO VECTOR MOVIMIENTO
+                Vector3 movementVector = Vector3.Empty;
+                if (moving && tocandoPiso)
+                {
+                    //Aplicar movimiento, desplazarse en base a la rotacion actual del personaje
+                    movementVector = new Vector3(
+                        0,
+                        -FastMath.Sin(motorcycle.Rotation.X) * moveForward,
+                        FastMath.Cos(motorcycle.Rotation.X) * moveForward
+                        );
+                }
+                if (moving && !tocandoPiso)
+                {
+                    //Aplicar movimiento, desplazarse en base a la rotacion actual del personaje
+                    movementVector = ultimoMov;
+                }
+                Vector3 realMovement = movementVector;
+
+                //    if (!terminoDeSaltar)
+                //  {
+                //    if(framesParaSaltar == 0)
+                //  {
+                //    terminoDeSaltar = true;
+                //  framesParaSaltar = 51;
+                //}
+                // framesParaSaltar--;
+                //}
+                //MOVIMIENTO EN SI guarda en realMovement el movimiento que no colisiona
+                if ((bool)GuiController.Instance.Modifiers["Collisions"])// && terminoDeSaltar)
+                {
+                    realMovement = collisionManager.moveCharacter(characterElipsoid, movementVector, objetosColisionables);
+                    motorcycle.move(realMovement);
+                    ultimoMov = realMovement;
+
+                    //Cargar desplazamiento realizar en UserVar
+                    GuiController.Instance.UserVars.setValue("Movement", TgcParserUtils.printVector3(realMovement));
+                }
+                else
+                {
+
+                    //  if (!terminoDeSaltar)
+                    //  {
+                    //       movementVector += (Vector3)GuiController.Instance.Modifiers.getValue("Gravedad");
+                    //   }
+                    motorcycle.move(movementVector);
+                    ultimoMov = movementVector;
+
+                }
+
+
+                if (moving && collisionManager.Result.collisionFound)
+                {
+                    var asd = anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 1, 0));
+                    if (anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 0, 1)) > 1.5708f)
+                    {
+                        asd = -asd;
+                    }
+
+                    if (anguloEntreVectores(new Vector3(asd, 0, 0), motorcycle.Rotation) > 1.57f)
+                    {
+                        motoRota = true;
+                    }
+                    else
+                    {
+                        motorcycle.Rotation = new Vector3(asd, 0, 0);
+                    }
+                }
+
+
+                GuiController.Instance.UserVars.setValue("AnguloY", TgcParserUtils.printFloat(anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 1, 0))));
+                GuiController.Instance.UserVars.setValue("AnguloZ", TgcParserUtils.printFloat(anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 0, 1))));
+
+                //actualizo la camara
+                GuiController.Instance.ThirdPersonCamera.Target = motorcycle.Position;
+
+                //DEBUG
+                //Actualizar valores de la linea de movimiento
+                directionArrow.PStart = characterElipsoid.Center;
+                directionArrow.PEnd = characterElipsoid.Center + Vector3.Multiply(movementVector, 50);
+                directionArrow.updateValues();
+
+                //Actualizar valores de normal de colision
+                if (collisionManager.Result.collisionFound)
+                {
+                    collisionNormalArrow.PStart = collisionManager.Result.collisionPoint;
+                    collisionNormalArrow.PEnd = collisionManager.Result.collisionPoint + Vector3.Multiply(collisionManager.Result.collisionNormal, 80); ;
+                    collisionNormalArrow.updateValues();
+
+                    collisionPoint.Position = collisionManager.Result.collisionPoint;
+
+                    tocandoPiso = true;
+
+                }
+                else
+                {
+                    tocandoPiso = false;
+                    tiempoAcelerando = 0f;
+                    tiempoDescelerando = 0f;
+                }
             }
-            if (moving && collisionManager.Result.collisionFound)
-            {
-                motorcycle.Rotation = new Vector3(anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 1, 0)),0,0);
-            }
+            collisionNormalArrow.render();
 
-            GuiController.Instance.UserVars.setValue("Angulo", TgcParserUtils.printFloat(anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 1, 0))));
-
-
-
-            //actualizo la camara
-            GuiController.Instance.ThirdPersonCamera.Target = motorcycle.Position;
-
-            //DEBUG
-            //Actualizar valores de la linea de movimiento
-            directionArrow.PStart = characterElipsoid.Center;
-            directionArrow.PEnd = characterElipsoid.Center + Vector3.Multiply(movementVector, 50);
-            directionArrow.updateValues();
-
-            //Actualizar valores de normal de colision
-            if (collisionManager.Result.collisionFound)
-            {
-                collisionNormalArrow.PStart = collisionManager.Result.collisionPoint;
-                collisionNormalArrow.PEnd = collisionManager.Result.collisionPoint + Vector3.Multiply(collisionManager.Result.collisionNormal, 80); ;
-                collisionNormalArrow.updateValues();
-                collisionNormalArrow.render();
-
-                collisionPoint.Position = collisionManager.Result.collisionPoint;
-                collisionPoint.render();
-            }
+            collisionPoint.render();
 
             directionArrow.render();
             //TERMINA DEBUG
 
+       //     if (anguloEntreVectores(original_rot, motorcycle.Rotation) > 0.45f || anguloEntreVectores(original_rot, motorcycle.Rotation) < -0.45f)
+       //     {
+       //         tocandoPiso = false;
+       //         motorcycle.Rotation = original_rot;
+       //         motorcycle.Position = original_pos;
+       //         terminoDeSaltar = false;
+       //     }
             
 
             //Renders
