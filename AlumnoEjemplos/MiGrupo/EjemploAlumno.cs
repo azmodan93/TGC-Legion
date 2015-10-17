@@ -117,12 +117,12 @@ namespace AlumnoEjemplos.MiGrupo
             inicializarSkybox(texturesPath);
             
             //carga la ciudad
-            scene = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "ciudad\\Ciudad2-TgcScene.xml");
+            scene = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "pistaDesierto\\pistaDesierto-TgcScene.xml");
 
             //cargo la moto
             motorcycle = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "moto\\Moto2-TgcScene.xml").Meshes[0];
             motorcycle.move(0, 100
-                , 700);
+                , 0);
            
             //camara
             GuiController.Instance.ThirdPersonCamera.Enable = true;
@@ -236,16 +236,8 @@ namespace AlumnoEjemplos.MiGrupo
             float velocidadRotacion = (float)GuiController.Instance.Modifiers.getValue("VelocidadRotacion");
 
 
-            if (motoRota)
-            {
-                tiempoRota += elapsedTime;
-                if (tiempoRota > 5f)
-                {
-                    init();
-                }
-            }
-            else
-            {
+          
+           
 
                 if (d3dInput.keyUp(Key.W))
                 {
@@ -454,7 +446,7 @@ namespace AlumnoEjemplos.MiGrupo
                     tiempoAcelerando = 0f;
                     tiempoDescelerando = 0f;
                 }
-            }
+            
             collisionNormalArrow.render();
 
             collisionPoint.render();
