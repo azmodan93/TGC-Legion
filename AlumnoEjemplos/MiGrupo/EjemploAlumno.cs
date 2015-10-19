@@ -28,17 +28,19 @@ namespace AlumnoEjemplos.MiGrupo
             
              //Moto
              TgcMesh motorcycle;
-                 //movimiento
+        //movimiento
+       
                  float tiempoAcelerando = 0f;
                  float tiempoDescelerando = 0f;
                  float velIni = 0f;
-                 bool motoRota;
-                 float tiempoRota;
-             //collisions
+
+        //collisions
+       
              TgcElipsoid characterElipsoid;
              List<Collider> objetosColisionables = new List<Collider>();
              ElipsoidCollisionManager collisionManager;
             bool tocandoPiso = false;
+        Vector3 ultimaNormal = new Vector3(0, 0, 0);
             Vector3 ultimoMov = new Vector3(0,0,0);
            //  bool terminoDeSaltar = true;
             // int framesParaSaltar = 50;
@@ -52,8 +54,8 @@ namespace AlumnoEjemplos.MiGrupo
              TgcBox collisionPoint;
 
         /// <summary>
-        /// Categoría a la que pertenece el ejemplo.
-        /// Influye en donde se va a haber en el árbol de la derecha de la pantalla.
+        /// CategorÃ­a a la que pertenece el ejemplo.
+        /// Influye en donde se va a haber en el Ã¡rbol de la derecha de la pantalla.
         /// </summary>
         public override string getCategory()
         {
@@ -69,7 +71,7 @@ namespace AlumnoEjemplos.MiGrupo
         }
 
         /// <summary>
-        /// Completar con la descripción del TP
+        /// Completar con la descripciÃ³n del TP
         /// </summary>
         public override string getDescription()
         {
@@ -77,8 +79,8 @@ namespace AlumnoEjemplos.MiGrupo
         }
 
         /// <summary>
-        /// Método que se llama una sola vez,  al principio cuando se ejecuta el ejemplo.
-        /// Escribir aquí todo el código de inicialización: cargar modelos, texturas, modifiers, uservars, etc.
+        /// MÃ©todo que se llama una sola vez,  al principio cuando se ejecuta el ejemplo.
+        /// Escribir aquÃ­ todo el cÃ³digo de inicializaciÃ³n: cargar modelos, texturas, modifiers, uservars, etc.
         /// Borrar todo lo que no haga falta
         /// </summary>
         /// 
@@ -110,8 +112,7 @@ namespace AlumnoEjemplos.MiGrupo
             velIni = 0f;
             tocandoPiso = false;
             ultimoMov = new Vector3(0, 0, 0);
-            motoRota = false;
-            tiempoRota = 0f;
+           
 
             //skybox
             inicializarSkybox(texturesPath);
@@ -160,15 +161,17 @@ namespace AlumnoEjemplos.MiGrupo
 
             //Modifiers para desplazamiento del personaje
             GuiController.Instance.Modifiers.addFloat("VelocidadMax", 0f, 100f, 20f);
-            GuiController.Instance.Modifiers.addFloat("Aceleracion", 0f, 10f, 0.5f);
+            GuiController.Instance.Modifiers.addFloat("Aceleracion", 0f, 10f, 4f);
 
             GuiController.Instance.Modifiers.addFloat("Rozamiento", 0.1f, 2f, 0.1f);
             GuiController.Instance.Modifiers.addFloat("VelocidadRotacion", 1f,500f, 300f);
-            GuiController.Instance.Modifiers.addVertex3f("Gravedad", new Vector3(-50, -50, -50), new Vector3(50, 50, 50), new Vector3(0, -0.3f, 0));
+            GuiController.Instance.Modifiers.addVertex3f("Gravedad", new Vector3(-50, -500, -50), new Vector3(50, 500, 50), new Vector3(0, -0.3f, 0));
 
             GuiController.Instance.Modifiers.addFloat("SlideFactor", 0f, 10f, 1f);
             GuiController.Instance.Modifiers.addFloat("Pendiente", 0f, 1f, 0.72f);
-           
+            GuiController.Instance.UserVars.addVar("elapsedTime");
+            GuiController.Instance.UserVars.addVar("GravedadActual");
+
             GuiController.Instance.UserVars.addVar("Movement");
             GuiController.Instance.UserVars.addVar("AnguloZ");
             GuiController.Instance.UserVars.addVar("AnguloY");
@@ -210,11 +213,11 @@ namespace AlumnoEjemplos.MiGrupo
         }
 
         /// <summary>
-        /// Método que se llama cada vez que hay que refrescar la pantalla.
-        /// Escribir aquí todo el código referido al renderizado.
+        /// MÃ©todo que se llama cada vez que hay que refrescar la pantalla.
+        /// Escribir aquÃ­ todo el cÃ³digo referido al renderizado.
         /// Borrar todo lo que no haga falta
         /// </summary>
-        /// <param name="elapsedTime">Tiempo en segundos transcurridos desde el último frame</param>
+        /// <param name="elapsedTime">Tiempo en segundos transcurridos desde el Ãºltimo frame</param>
         public override void render(float elapsedTime)
         {
             Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
@@ -223,7 +226,7 @@ namespace AlumnoEjemplos.MiGrupo
             var original_pos = motorcycle.Position;
             var original_rot = motorcycle.Rotation;
 
-           
+            float bigElapsed = elapsedTime * 20 + 0.1f;
             bool showBB = (bool)GuiController.Instance.Modifiers.getValue("showBoundingBox");
             float aceleracion = 0f;
             float moveForward=0f;
@@ -234,12 +237,11 @@ namespace AlumnoEjemplos.MiGrupo
             float velMax = (float)GuiController.Instance.Modifiers.getValue("VelocidadMax");
             float rozamiento = (float)GuiController.Instance.Modifiers.getValue("Rozamiento");
             float velocidadRotacion = (float)GuiController.Instance.Modifiers.getValue("VelocidadRotacion");
+            GuiController.Instance.UserVars.setValue("elapsedTime", TgcParserUtils.printFloat(elapsedTime));
+            
 
 
-          
-           
-
-                if (d3dInput.keyUp(Key.W))
+            if (d3dInput.keyUp(Key.W))
                 {
                     tiempoAcelerando = 0f;
                 }
@@ -255,7 +257,7 @@ namespace AlumnoEjemplos.MiGrupo
                 if (d3dInput.keyDown(Key.W) && tocandoPiso)
                 {
                     aceleracion = aceleracionVar;
-                    moveForward = -aceleracion * tiempoAcelerando + velIni;
+                    moveForward = (-aceleracion * tiempoAcelerando + velIni)*bigElapsed;
                     if (moveForward < -velMax)
                     {
                         moveForward = -velMax;
@@ -270,7 +272,7 @@ namespace AlumnoEjemplos.MiGrupo
                 if (d3dInput.keyDown(Key.S) && tocandoPiso)
                 {
                     aceleracion = -aceleracionVar;
-                    moveForward = -aceleracion * tiempoDescelerando + velIni;
+                    moveForward = (-aceleracion * tiempoDescelerando + velIni)*bigElapsed;
                     if (moveForward > velMax / 2)
                     {
                         moveForward = velMax / 2;
@@ -291,11 +293,11 @@ namespace AlumnoEjemplos.MiGrupo
                 {
                     if (moveForward < 0)
                     {
-                        moveForward += rozamiento;
+                        moveForward += rozamiento*bigElapsed;
                     }
                     if (moveForward > 0)
                     {
-                        moveForward -= rozamiento;
+                        moveForward -= rozamiento*bigElapsed;
                     }
                     velIni = moveForward;
                 }
@@ -343,8 +345,10 @@ namespace AlumnoEjemplos.MiGrupo
 
                 //Actualizar valores de gravedad
                 collisionManager.GravityEnabled = (bool)GuiController.Instance.Modifiers["HabilitarGravedad"];
-                collisionManager.GravityForce = (Vector3)GuiController.Instance.Modifiers["Gravedad"] /** elapsedTime*/;
-                collisionManager.SlideFactor = (float)GuiController.Instance.Modifiers["SlideFactor"];
+            collisionManager.GravityForce = (Vector3)GuiController.Instance.Modifiers["Gravedad"];//* elapsedTime;
+            GuiController.Instance.UserVars.setValue("GravedadActual", TgcParserUtils.printFloat(collisionManager.GravityForce.Y));
+
+            collisionManager.SlideFactor = (float)GuiController.Instance.Modifiers["SlideFactor"];
                 collisionManager.OnGroundMinDotValue = (float)GuiController.Instance.Modifiers["Pendiente"];
 
                 //CALCULO VECTOR MOVIMIENTO
@@ -365,17 +369,33 @@ namespace AlumnoEjemplos.MiGrupo
                 }
                 Vector3 realMovement = movementVector;
 
-                //    if (!terminoDeSaltar)
-                //  {
-                //    if(framesParaSaltar == 0)
-                //  {
-                //    terminoDeSaltar = true;
-                //  framesParaSaltar = 51;
-                //}
-                // framesParaSaltar--;
-                //}
-                //MOVIMIENTO EN SI guarda en realMovement el movimiento que no colisiona
-                if ((bool)GuiController.Instance.Modifiers["Collisions"])// && terminoDeSaltar)
+            //    if (!terminoDeSaltar)
+            //  {
+            //    if(framesParaSaltar == 0)
+            //  {
+            //    terminoDeSaltar = true;
+            //  framesParaSaltar = 51;
+            //}
+            // framesParaSaltar--;
+            //}
+
+            if (moving && tocandoPiso)
+            {
+                var asd = anguloEntreVectores(ultimaNormal, new Vector3(0, 1, 0));
+                if (anguloEntreVectores(ultimaNormal, new Vector3(0, 0, 1)) > 1.5708f)
+                {
+                    asd = -asd;
+                }
+
+            
+               
+                    motorcycle.Rotation = new Vector3(asd, 0, 0);
+               
+            }
+
+
+            //MOVIMIENTO EN SI guarda en realMovement el movimiento que no colisiona
+            if ((bool)GuiController.Instance.Modifiers["Collisions"])// && terminoDeSaltar)
                 {
                     realMovement = collisionManager.moveCharacter(characterElipsoid, movementVector, objetosColisionables);
                     motorcycle.move(realMovement);
@@ -396,27 +416,20 @@ namespace AlumnoEjemplos.MiGrupo
 
                 }
 
-
-                if (moving && collisionManager.Result.collisionFound)
+            /*if((d3dInput.keyDown(Key.W) || d3dInput.keyDown(Key.S)) && realMovement == new Vector3(0, 0, 0))
+            {
+                if(trabada == 150)
                 {
-                    var asd = anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 1, 0));
-                    if (anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 0, 1)) > 1.5708f)
-                    {
-                        asd = -asd;
-                    }
-
-                    if (anguloEntreVectores(new Vector3(asd, 0, 0), motorcycle.Rotation) > 1.57f)
-                    {
-                        motoRota = true;
-                    }
-                    else
-                    {
-                        motorcycle.Rotation = new Vector3(asd, 0, 0);
-                    }
+                    motorcycle.move(new Vector3(0, 1, 0));
+                    characterElipsoid.moveCenter(new Vector3(0, 1, 0));
+                    trabada = 0;
                 }
+                trabada++;
+            }*/
+            
 
 
-                GuiController.Instance.UserVars.setValue("AnguloY", TgcParserUtils.printFloat(anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 1, 0))));
+            GuiController.Instance.UserVars.setValue("AnguloY", TgcParserUtils.printFloat(anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 1, 0))));
                 GuiController.Instance.UserVars.setValue("AnguloZ", TgcParserUtils.printFloat(anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 0, 1))));
 
                 //actualizo la camara
@@ -438,15 +451,14 @@ namespace AlumnoEjemplos.MiGrupo
                     collisionPoint.Position = collisionManager.Result.collisionPoint;
 
                     tocandoPiso = true;
-
                 }
                 else
                 {
                     tocandoPiso = false;
-                    tiempoAcelerando = 0f;
-                    tiempoDescelerando = 0f;
+                   // tiempoAcelerando = 0f;
+                  //  tiempoDescelerando = 0f;
                 }
-            
+            ultimaNormal = collisionManager.Result.collisionNormal;
             collisionNormalArrow.render();
 
             collisionPoint.render();
@@ -476,7 +488,7 @@ namespace AlumnoEjemplos.MiGrupo
         }
 
         /// <summary>
-        /// Método que se llama cuando termina la ejecución del ejemplo.
+        /// MÃ©todo que se llama cuando termina la ejecuciÃ³n del ejemplo.
         /// Hacer dispose() de todos los objetos creados.
         /// </summary>
         public override void close()
