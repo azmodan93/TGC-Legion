@@ -24,36 +24,6 @@ namespace AlumnoEjemplos.MiGrupo
     {
         //VARIABLES GLOBALES
 
-        //skybox
-        TgcSkyBox skyBox;
-
-        //Moto
-        TgcMesh motorcycle;
-        //movimiento
-
-        float tiempoAcelerando = 0f;
-        float tiempoDescelerando = 0f;
-        float velIni = 0f;
-
-        //collisions
-
-        TgcElipsoid characterElipsoid;
-        List<Collider> objetosColisionables = new List<Collider>();
-        ElipsoidCollisionManager collisionManager;
-        bool tocandoPiso = false;
-        Vector3 ultimaNormal = new Vector3(0, 0, 0);
-        Vector3 ultimoMov = new Vector3(0, 0, 0);
-        //  bool terminoDeSaltar = true;
-        // int framesParaSaltar = 50;
-
-        //Ciudad
-        TgcScene scene;
-
-        //Debug
-        TgcArrow collisionNormalArrow;
-        TgcArrow directionArrow;
-        TgcBox collisionPoint;
-
         //Para la pantalla de inicio
         MenuInicio menuInicio;
         MenuCreditos menuCreditos;

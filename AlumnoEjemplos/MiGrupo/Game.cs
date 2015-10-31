@@ -55,7 +55,7 @@ namespace AlumnoEjemplos.MiGrupo
         public Game()
         {
             d3dDevice = GuiController.Instance.D3dDevice;
-            string texturesPath = GuiController.Instance.ExamplesMediaDir + "Texturas\\Quake\\SkyBox1\\";
+            string texturesPath = GuiController.Instance.AlumnoEjemplosMediaDir + "skybox\\";
             TgcSceneLoader loader = new TgcSceneLoader();
             collisionManager = new ElipsoidCollisionManager();
             collisionManager.GravityEnabled = false;
@@ -64,6 +64,7 @@ namespace AlumnoEjemplos.MiGrupo
             velIni = 0f;
             tocandoPiso = false;
             ultimoMov = new Vector3(0, 0, 0);
+
             //skybox
             inicializarSkybox(texturesPath);
 
@@ -156,15 +157,14 @@ namespace AlumnoEjemplos.MiGrupo
         public void inicializarSkybox(String texturesPath)
         {
             skyBox = new TgcSkyBox();
-            skyBox.Center = new Vector3(0, 4000, 0);
-            skyBox.Size = new Vector3(10000, 10000, 50000);
-            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Up, texturesPath + "phobos_up.jpg");
-            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Down, texturesPath + "phobos_dn.jpg");
-            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Left, texturesPath + "phobos_lf.jpg");
-            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Right, texturesPath + "phobos_rt.jpg");
-            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Front, texturesPath + "phobos_bk.jpg");
-            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Back, texturesPath + "phobos_ft.jpg");
-            skyBox.SkyEpsilon = 50f;
+            skyBox.Center = new Vector3(0, 1000, -6000);
+            skyBox.Size = new Vector3(15000, 15000, 25000);
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Up, texturesPath + "top.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Down, texturesPath + "down.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Left, texturesPath + "left.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Right, texturesPath + "right.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Front, texturesPath + "back.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Back, texturesPath + "front.jpg");
             skyBox.updateValues();
         }
 
@@ -207,7 +207,7 @@ namespace AlumnoEjemplos.MiGrupo
             }
 
             //Adelante
-            if (d3dInput.keyDown(Key.W) && tocandoPiso)
+            if (d3dInput.keyDown(Key.W) && collisionManager.isOnTheGround())
             {
                 aceleracion = aceleracionVar;
                 moveForward = (-aceleracion * tiempoAcelerando + velIni) * bigElapsed;
@@ -222,7 +222,7 @@ namespace AlumnoEjemplos.MiGrupo
             }
 
             //Atras
-            if (d3dInput.keyDown(Key.S) && tocandoPiso)
+            if (d3dInput.keyDown(Key.S) && collisionManager.isOnTheGround())
             {
                 aceleracion = -aceleracionVar;
                 moveForward = (-aceleracion * tiempoDescelerando + velIni) * bigElapsed;
@@ -235,7 +235,7 @@ namespace AlumnoEjemplos.MiGrupo
                 tiempoAcelerando = 0f;
             }
 
-            if ((!d3dInput.keyDown(Key.S) && !d3dInput.keyDown(Key.W)) || !tocandoPiso)
+            if ((!d3dInput.keyDown(Key.S) && !d3dInput.keyDown(Key.W)) || !collisionManager.isOnTheGround())
             {
                 aceleracion = 0f;
                 moveForward = velIni;
@@ -271,14 +271,14 @@ namespace AlumnoEjemplos.MiGrupo
             GuiController.Instance.UserVars.setValue("tiempoDesce", TgcParserUtils.printFloat(tiempoDescelerando));
 
             //Derecha
-            if (d3dInput.keyDown(Key.D) && !tocandoPiso)
+            if (d3dInput.keyDown(Key.D) && !collisionManager.isOnTheGround())
             {
                 rotate = -velocidadRotacion;
                 rotating = true;
             }
 
             //Izquierda
-            if (d3dInput.keyDown(Key.A) && !tocandoPiso)
+            if (d3dInput.keyDown(Key.A) && !collisionManager.isOnTheGround())
             {
                 rotate = velocidadRotacion;
                 rotating = true;
@@ -302,7 +302,7 @@ namespace AlumnoEjemplos.MiGrupo
 
             //CALCULO VECTOR MOVIMIENTO
             Vector3 movementVector = Vector3.Empty;
-            if (moving && tocandoPiso)
+            if (moving && collisionManager.isOnTheGround())
             {
                 //Aplicar movimiento, desplazarse en base a la rotacion actual del personaje
                 movementVector = new Vector3(
@@ -311,7 +311,7 @@ namespace AlumnoEjemplos.MiGrupo
                     FastMath.Cos(motorcycle.Rotation.X) * moveForward
                     );
             }
-            if (moving && !tocandoPiso)
+            if (moving && !collisionManager.isOnTheGround())
             {
                 //Aplicar movimiento, desplazarse en base a la rotacion actual del personaje
                 movementVector = ultimoMov;
@@ -328,7 +328,7 @@ namespace AlumnoEjemplos.MiGrupo
             // framesParaSaltar--;
             //}
 
-            if (moving && tocandoPiso)
+            if (moving && collisionManager.isOnTheGround())
             {
                 var asd = anguloEntreVectores(ultimaNormal, new Vector3(0, 1, 0));
                 if (anguloEntreVectores(ultimaNormal, new Vector3(0, 0, 1)) > 1.5708f)
