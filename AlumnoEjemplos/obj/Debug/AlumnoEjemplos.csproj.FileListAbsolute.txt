@@ -14,3 +14,25 @@ C:\UTN\TGC\TgcViewer - 2014-1C\TgcViewer\AlumnoEjemplos\AlumnoEjemplos.pdb
 C:\UTN\TGC\TgcViewer - 2014-1C\TgcViewer\AlumnoEjemplos\TgcViewer.exe
 C:\UTN\TGC\TgcViewer - 2014-1C\TgcViewer\AlumnoEjemplos\Ionic.Zip.dll
 C:\UTN\TGC\TgcViewer - 2014-1C\TgcViewer\AlumnoEjemplos\TgcViewer.pdb
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\obj\Debug\AlumnoEjemplos.csprojResolveAssemblyReference.cache
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\obj\Debug\AlumnoEjemplos.dll
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\obj\Debug\AlumnoEjemplos.pdb
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\AlumnoEjemplos.dll
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\AlumnoEjemplos.pdb
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.Direct3D.dll
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.Direct3DX.dll
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.DirectDraw.dll
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.DirectInput.dll
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.DirectPlay.dll
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.DirectSound.dll
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.dll
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\TgcViewer.exe
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Ionic.Zip.dll
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\TgcViewer.pdb
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.xml
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.Direct3D.xml
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.Direct3DX.xml
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.DirectDraw.xml
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.DirectInput.xml
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.DirectPlay.xml
+C:\Users\Franco\Desktop\Franco\Facu\Tercero\TGC\TgcViewer\AlumnoEjemplos\Microsoft.DirectX.DirectSound.xml
