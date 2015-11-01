@@ -30,6 +30,9 @@ namespace AlumnoEjemplos.MiGrupo
         //Moto
         TgcMesh motorcycle;
 
+        //Piramide
+        TgcMesh piramid;
+
         //movimiento
         float tiempoAcelerando = 0f;
         float tiempoDescelerando = 0f;
@@ -45,16 +48,23 @@ namespace AlumnoEjemplos.MiGrupo
         //  bool terminoDeSaltar = true;
         // int framesParaSaltar = 50;
 
-        //Final Pista
+        //TrabaPista
         TgcBox lineaInicio;
+
+        //Final Pista
+        TgcBox lineaFin;
 
         //Ciudad
         TgcScene scene;
+
+        TgcText2d textGanaste;
 
         //Debug
         TgcArrow collisionNormalArrow;
         TgcArrow directionArrow;
         TgcBox collisionPoint;
+
+        bool terminoJuego = false;
 
         public Game()
         {
@@ -73,11 +83,27 @@ namespace AlumnoEjemplos.MiGrupo
             inicializarSkybox(texturesPath);
 
             //carga la ciudad
-            scene = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "pistaDesierto\\pistaDesierto-TgcScene.xml");
+            scene = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "pistaDesierto\\pistaDesierto2-TgcScene.xml");
 
             //cargo la moto
             motorcycle = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "moto\\Moto2-TgcScene.xml").Meshes[0];
-            motorcycle.move(0, 100, -50);
+            motorcycle.move(0, 100, -150);
+
+            //cargo la piramide
+            piramid = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "piramide\\piramide-TgcScene.xml").Meshes[0];
+            piramid.Scale = new Vector3(5, 5, 5);
+            piramid.move(-225, -45, -13750);
+
+            //cargo texto ganaste
+            
+           textGanaste = new TgcText2d();
+
+            //Cargar Textos
+            textGanaste.Text = "FELICIDADES, HAS GANADO";
+            textGanaste.Position = new Point(0, 100);
+            textGanaste.changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
+            textGanaste.Color = Color.Gray;
+
 
             //camara
             GuiController.Instance.ThirdPersonCamera.Enable = true;
@@ -88,7 +114,7 @@ namespace AlumnoEjemplos.MiGrupo
 
             motorcycle.Scale = new Vector3(0.5f, 0.5f, 0.5f);
 
-            motorcycle.AutoUpdateBoundingBox = false;
+           // motorcycle.AutoUpdateBoundingBox = false;
             characterElipsoid = new TgcElipsoid(motorcycle.BoundingBox.calculateBoxCenter() + new Vector3(0, 0, 0), new Vector3(23, 23, 23) * 0.5f);
 
             //cargo los colliders
@@ -109,14 +135,22 @@ namespace AlumnoEjemplos.MiGrupo
                 }
             }
 
-            
+            //agrego Piramide Como objeto Colisionable
+            objetosColisionables.Add(BoundingBoxCollider.fromBoundingBox(piramid.BoundingBox));
 
-            //Cargo lineaFin
+            //Cargo lineaInicio
 
             lineaInicio = new TgcBox();
-            lineaInicio.Position = new Vector3(-7, 30, 50);
+            lineaInicio.Position = new Vector3(-7, 30, -50);
             lineaInicio.Size = new Vector3(200, 2000, 1);
             lineaInicio.updateValues();
+
+            //Cargo lineaFin
+            lineaFin = new TgcBox();
+            lineaFin.Size = new Vector3(100, 100, 1);
+            lineaFin.Position = new Vector3(0, 15, -13250);
+            lineaFin.Color = Color.White;
+            lineaFin.updateValues();
 
             //La agrego como objeto colisionable
             objetosColisionables.Add(BoundingBoxCollider.fromBoundingBox(lineaInicio.BoundingBox));
@@ -422,6 +456,19 @@ namespace AlumnoEjemplos.MiGrupo
                 // tiempoAcelerando = 0f;
                 //  tiempoDescelerando = 0f;
             }
+
+            if(TgcCollisionUtils.testAABBAABB(motorcycle.BoundingBox,lineaFin.BoundingBox))
+            {
+                terminoJuego = true;
+                objetosColisionables.Clear();    
+            }
+
+            if (terminoJuego)
+            {
+                GuiController.Instance.ThirdPersonCamera.Target = lineaFin.Position;
+                textGanaste.render();
+            }
+
             ultimaNormal = collisionManager.Result.collisionNormal;
 
             collisionNormalArrow.render();
@@ -440,6 +487,9 @@ namespace AlumnoEjemplos.MiGrupo
             //     }
 
             //Renders
+            
+            //lineaFin.render();
+            piramid.render();
             motorcycle.render();
             scene.renderAll();
             skyBox.render();
@@ -458,6 +508,8 @@ namespace AlumnoEjemplos.MiGrupo
             characterElipsoid.dispose();
             collisionNormalArrow.dispose();
             directionArrow.dispose();
+            piramid.dispose();
+
         }
 
     }
