@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using TgcViewer;
+using TgcViewer.Utils._2D;
 using TgcViewer.Utils.Collision.ElipsoidCollision;
 using TgcViewer.Utils.Input;
 using TgcViewer.Utils.Terrain;
@@ -44,6 +45,9 @@ namespace AlumnoEjemplos.MiGrupo
         //  bool terminoDeSaltar = true;
         // int framesParaSaltar = 50;
 
+        //Final Pista
+        TgcBox lineaInicio;
+
         //Ciudad
         TgcScene scene;
 
@@ -73,7 +77,7 @@ namespace AlumnoEjemplos.MiGrupo
 
             //cargo la moto
             motorcycle = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "moto\\Moto2-TgcScene.xml").Meshes[0];
-            motorcycle.move(0, 100, 0);
+            motorcycle.move(0, 100, -50);
 
             //camara
             GuiController.Instance.ThirdPersonCamera.Enable = true;
@@ -105,6 +109,18 @@ namespace AlumnoEjemplos.MiGrupo
                 }
             }
 
+            
+
+            //Cargo lineaFin
+
+            lineaInicio = new TgcBox();
+            lineaInicio.Position = new Vector3(-7, 30, 50);
+            lineaInicio.Size = new Vector3(200, 2000, 1);
+            lineaInicio.updateValues();
+
+            //La agrego como objeto colisionable
+            objetosColisionables.Add(BoundingBoxCollider.fromBoundingBox(lineaInicio.BoundingBox));
+
             //Modifier para ver BoundingBox
             GuiController.Instance.Modifiers.addBoolean("Collisions", "Collisions", true);
             GuiController.Instance.Modifiers.addBoolean("showBoundingBox", "Bouding Box", true);
@@ -132,6 +148,7 @@ namespace AlumnoEjemplos.MiGrupo
             GuiController.Instance.UserVars.addVar("aceleracion");
             GuiController.Instance.UserVars.addVar("tiempoAcel");
             GuiController.Instance.UserVars.addVar("tiempoDesce");
+          
 
             //DEBUG
             //Crear linea para mostrar la direccion del movimiento del personaje
@@ -218,6 +235,7 @@ namespace AlumnoEjemplos.MiGrupo
                 velIni = moveForward;
                 tiempoAcelerando += elapsedTime;
                 tiempoDescelerando = 0f;
+                
 
             }
 
@@ -269,7 +287,7 @@ namespace AlumnoEjemplos.MiGrupo
             GuiController.Instance.UserVars.setValue("aceleracion", TgcParserUtils.printFloat(aceleracion));
             GuiController.Instance.UserVars.setValue("tiempoAcel", TgcParserUtils.printFloat(tiempoAcelerando));
             GuiController.Instance.UserVars.setValue("tiempoDesce", TgcParserUtils.printFloat(tiempoDescelerando));
-
+      
             //Derecha
             if (d3dInput.keyDown(Key.D) && !collisionManager.isOnTheGround())
             {
@@ -347,9 +365,10 @@ namespace AlumnoEjemplos.MiGrupo
                 realMovement = collisionManager.moveCharacter(characterElipsoid, movementVector, objetosColisionables);
                 motorcycle.move(realMovement);
                 ultimoMov = realMovement;
-
+              
                 //Cargar desplazamiento realizar en UserVar
                 GuiController.Instance.UserVars.setValue("Movement", TgcParserUtils.printVector3(realMovement));
+                
             }
             else
             {
@@ -386,7 +405,7 @@ namespace AlumnoEjemplos.MiGrupo
             directionArrow.PEnd = characterElipsoid.Center + Vector3.Multiply(movementVector, 50);
             directionArrow.updateValues();
 
-            //Actualizar valores de normal de colision
+        //Actualizar valores de normal de colision
             if (collisionManager.Result.collisionFound)
             {
                 collisionNormalArrow.PStart = collisionManager.Result.collisionPoint;
@@ -404,6 +423,7 @@ namespace AlumnoEjemplos.MiGrupo
                 //  tiempoDescelerando = 0f;
             }
             ultimaNormal = collisionManager.Result.collisionNormal;
+
             collisionNormalArrow.render();
 
             collisionPoint.render();
@@ -423,6 +443,7 @@ namespace AlumnoEjemplos.MiGrupo
             motorcycle.render();
             scene.renderAll();
             skyBox.render();
+
             if (showBB)
             {
                 characterElipsoid.render();
