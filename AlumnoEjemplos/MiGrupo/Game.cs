@@ -49,7 +49,6 @@ namespace AlumnoEjemplos.MiGrupo
         bool saltando = false;
         Vector3 ultimaNormal = new Vector3(0, 0, 0);
         Vector3 ultimoMov = new Vector3(0, 0, 0);
-        
 
         //TrabaPista
         TgcBox lineaInicio;
@@ -62,13 +61,18 @@ namespace AlumnoEjemplos.MiGrupo
 
         TgcText2d textGanaste;
         TgcText2d textGanaste2;
-
+        TgcText2d textoContadorTiempo;
+        TgcText2d textoMejorTiempo;
 
         //Debug
         TgcArrow collisionNormalArrow;
         TgcArrow directionArrow;
         TgcBox collisionPoint;
         bool showBB;
+
+        //tiempo
+        float mejor_tiempo = 0;
+        float tiempoTranscurrido = 0;
 
         bool terminoJuego = false;
 
@@ -83,7 +87,7 @@ namespace AlumnoEjemplos.MiGrupo
             tiempoDescelerando = 0f;
             velIni = 0f;
             tocandoPiso = false;
-                saltando = true;
+            saltando = true;
             ultimoMov = new Vector3(0, 0, 0);
 
             //skybox
@@ -94,11 +98,11 @@ namespace AlumnoEjemplos.MiGrupo
             foreach (TgcBoundingBox bb in checkpoints)
             {
                 bb.setExtremes(new Vector3(-200, -100, posCP), new Vector3(200, 1000, posCP - 10));
-                    posCP -= 1300;
+                posCP -= 1300;
             }
 
-                //carga la ciudad
-                scene = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "pistaDesierto\\pistaDesierto2-TgcScene.xml");
+            //carga la ciudad
+            scene = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "pistaDesierto\\pistaDesierto2-TgcScene.xml");
 
             //cargo la moto
             motorcycle = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "moto\\Moto2-TgcScene.xml").Meshes[0];
@@ -110,22 +114,37 @@ namespace AlumnoEjemplos.MiGrupo
             piramid.move(-225, -45, -13750);
 
             //cargo texto ganaste
-            
-           textGanaste = new TgcText2d();
+
+            textGanaste = new TgcText2d();
             textGanaste2 = new TgcText2d();
 
             //Cargar Textos
             textGanaste.Text = "FELICIDADES, HAS GANADO";
             textGanaste2.Text = "APRETE I PARA VOLVER AL MENU";
-            textGanaste.Position = new Point(0, 100);
-            textGanaste2.Position = new Point(0, 50);
+            textGanaste.Position = new Point(0, 50);
+            textGanaste2.Position = new Point(0, 100);
             textGanaste.changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
             textGanaste2.changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
 
             textGanaste.Color = Color.White;
             textGanaste2.Color = Color.White;
 
+            // Creo texto contador de tiempo
+            textoContadorTiempo = new TgcText2d();
+            textoContadorTiempo.Color = Color.Red;
+            textoContadorTiempo.Align = TgcText2d.TextAlign.LEFT;
+            textoContadorTiempo.Position = new Point(0, 400); //(680, 400)
+            textoContadorTiempo.Size = new Size(300, 100);
+            textoContadorTiempo.changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold));
 
+            // Creo texto mejor tiempo
+            textoMejorTiempo = new TgcText2d();
+            textoMejorTiempo.Color = Color.Red;
+            textoMejorTiempo.Align = TgcText2d.TextAlign.LEFT;
+            textoMejorTiempo.Position = new Point(0, 430);  //(680, 430)
+            textoMejorTiempo.Size = new Size(300, 100);
+            textoMejorTiempo.changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold));
+            
 
             //camara
             GuiController.Instance.ThirdPersonCamera.Enable = true;
@@ -136,7 +155,7 @@ namespace AlumnoEjemplos.MiGrupo
 
             motorcycle.Scale = new Vector3(0.5f, 0.5f, 0.5f);
 
-           // motorcycle.AutoUpdateBoundingBox = false;
+            // motorcycle.AutoUpdateBoundingBox = false;
             characterElipsoid = new TgcElipsoid(motorcycle.BoundingBox.calculateBoxCenter() + new Vector3(0, 0, 0), new Vector3(23, 23, 23) * 0.5f);
 
             //cargo los colliders
@@ -147,7 +166,7 @@ namespace AlumnoEjemplos.MiGrupo
                 if (mesh.Layer == "TriangleCollision")
                 {
                     objetosColisionables.Add(TriangleMeshCollider.fromMesh(mesh));
-                   
+
                 }
                 //El resto de los objetos son colisiones de BoundingBox. Las colisiones a nivel de triangulo son muy costosas asi que deben utilizarse solo
                 //donde es extremadamente necesario (por ejemplo en el piso). El resto se simplifica con un BoundingBox
@@ -179,7 +198,7 @@ namespace AlumnoEjemplos.MiGrupo
 
             //Modifier para ver BoundingBox
             GuiController.Instance.Modifiers.addBoolean("Collisions", "Collisions", true);
-          
+
             showBB = true;
             GuiController.Instance.Modifiers.addBoolean("HabilitarGravedad", "Habilitar Gravedad", true);
 
@@ -207,7 +226,6 @@ namespace AlumnoEjemplos.MiGrupo
             GuiController.Instance.UserVars.addVar("aceleracion");
             GuiController.Instance.UserVars.addVar("tiempoAcel");
             GuiController.Instance.UserVars.addVar("tiempoDesce");
-          
 
             //DEBUG
             //Crear linea para mostrar la direccion del movimiento del personaje
@@ -253,7 +271,7 @@ namespace AlumnoEjemplos.MiGrupo
 
         public bool pasoPorAlgunCheck()
         {
-            foreach(TgcBoundingBox cp in checkpoints)
+            foreach (TgcBoundingBox cp in checkpoints)
             {
                 if (TgcCollisionUtils.testAABBAABB(motorcycle.BoundingBox, cp))
                 {
@@ -261,6 +279,19 @@ namespace AlumnoEjemplos.MiGrupo
                 }
             }
             return false;
+        }
+
+        public string FormatearTiempo(float tiempo)
+        {
+            int minutos;
+            int segundos;
+            int centesimas;
+
+            minutos = (int)(tiempo / 60);
+            segundos = (int)(tiempo - minutos * 60);
+            centesimas = (int)((tiempo - segundos - minutos * 60) * 100);
+
+            return minutos.ToString().PadLeft(2, '0') + ":" + segundos.ToString().PadLeft(2, '0') + ":" + centesimas.ToString().PadLeft(2, '0');
         }
 
         public void activar(ref AlumnoEjemplos.MiGrupo.EjemploAlumno.states estado, float elapsedTime)
@@ -296,7 +327,7 @@ namespace AlumnoEjemplos.MiGrupo
 
             if (d3dInput.keyPressed(Key.C))
             {
-                motorcycle.Position = ultimoCheck + new Vector3(0,10,0);
+                motorcycle.Position = ultimoCheck + new Vector3(0, 10, 0);
                 characterElipsoid.setCenter(ultimoCheck + new Vector3(0, 10, 0));
                 tiempoAcelerando = 0f;
                 tiempoDescelerando = 0f;
@@ -335,7 +366,7 @@ namespace AlumnoEjemplos.MiGrupo
                 velIni = moveForward;
                 tiempoAcelerando += elapsedTime;
                 tiempoDescelerando = 0f;
-                
+
 
             }
 
@@ -387,7 +418,7 @@ namespace AlumnoEjemplos.MiGrupo
             GuiController.Instance.UserVars.setValue("aceleracion", TgcParserUtils.printFloat(aceleracion));
             GuiController.Instance.UserVars.setValue("tiempoAcel", TgcParserUtils.printFloat(tiempoAcelerando));
             GuiController.Instance.UserVars.setValue("tiempoDesce", TgcParserUtils.printFloat(tiempoDescelerando));
-      
+
             //Derecha
             if (d3dInput.keyDown(Key.D) && !collisionManager.isOnTheGround())
             {
@@ -419,50 +450,50 @@ namespace AlumnoEjemplos.MiGrupo
             collisionManager.OnGroundMinDotValue = (float)GuiController.Instance.Modifiers["Pendiente"];
             Vector3 realMovement;
             Vector3 movementVector;
-            
-            if(!collisionManager.isOnTheGround() && !rotating)
+
+            if (!collisionManager.isOnTheGround() && !rotating)
             {
                 if (motorcycle.Rotation.X < -0.1)
                 {
-                    motorcycle.rotateX(1f*elapsedTime);
+                    motorcycle.rotateX(1f * elapsedTime);
                 }
                 if (motorcycle.Rotation.X > 0.1)
                 {
-                    motorcycle.rotateX(-1f*elapsedTime);
+                    motorcycle.rotateX(-1f * elapsedTime);
                 }
             }
 
-                //CALCULO VECTOR MOVIMIENTO
-                movementVector = Vector3.Empty;
-                if (moving && collisionManager.isOnTheGround())
+            //CALCULO VECTOR MOVIMIENTO
+            movementVector = Vector3.Empty;
+            if (moving && collisionManager.isOnTheGround())
+            {
+                //Aplicar movimiento, desplazarse en base a la rotacion actual del personaje
+                movementVector = new Vector3(
+                    0,
+                    -FastMath.Sin(motorcycle.Rotation.X) * moveForward,
+                    FastMath.Cos(motorcycle.Rotation.X) * moveForward
+                    );
+            }
+
+            if (moving && !collisionManager.isOnTheGround())
+            {
+                //Aplicar movimiento, desplazarse en base a la rotacion actual del personaje
+                movementVector = ultimoMov;
+            }
+            realMovement = movementVector;
+            if (moving && collisionManager.isOnTheGround())
+            {
+                var asd = anguloEntreVectores(ultimaNormal, new Vector3(0, 1, 0));
+                if (anguloEntreVectores(ultimaNormal, new Vector3(0, 0, 1)) > 1.5708f)
                 {
-                    //Aplicar movimiento, desplazarse en base a la rotacion actual del personaje
-                    movementVector = new Vector3(
-                        0,
-                        -FastMath.Sin(motorcycle.Rotation.X) * moveForward,
-                        FastMath.Cos(motorcycle.Rotation.X) * moveForward
-                        );
+                    asd = -asd;
                 }
 
-                if (moving && !collisionManager.isOnTheGround())
-                {
-                    //Aplicar movimiento, desplazarse en base a la rotacion actual del personaje
-                    movementVector = ultimoMov;
-                }
-               realMovement = movementVector;
-                if (moving && collisionManager.isOnTheGround())
-                {
-                    var asd = anguloEntreVectores(ultimaNormal, new Vector3(0, 1, 0));
-                    if (anguloEntreVectores(ultimaNormal, new Vector3(0, 0, 1)) > 1.5708f)
-                    {
-                        asd = -asd;
-                    }
+                motorcycle.Rotation = new Vector3(asd, 0, 0);
 
-                    motorcycle.Rotation = new Vector3(asd, 0, 0);
+            }
 
-                }
 
-            
 
             //    if (!terminoDeSaltar)
             //  {
@@ -483,7 +514,7 @@ namespace AlumnoEjemplos.MiGrupo
                 realMovement = collisionManager.moveCharacter(characterElipsoid, movementVector, objetosColisionables);
                 motorcycle.move(realMovement);
                 ultimoMov = realMovement;
-              
+
                 //Cargar desplazamiento realizar en UserVar
                 GuiController.Instance.UserVars.setValue("Movement", TgcParserUtils.printVector3(realMovement));
                 GuiController.Instance.UserVars.setValue("Rotation", TgcParserUtils.printVector3(motorcycle.Rotation));
@@ -531,7 +562,7 @@ namespace AlumnoEjemplos.MiGrupo
             directionArrow.PEnd = characterElipsoid.Center + Vector3.Multiply(movementVector, 50);
             directionArrow.updateValues();
 
-        //Actualizar valores de normal de colision
+            //Actualizar valores de normal de colision
             if (collisionManager.Result.collisionFound)
             {
                 collisionNormalArrow.PStart = collisionManager.Result.collisionPoint;
@@ -552,12 +583,13 @@ namespace AlumnoEjemplos.MiGrupo
             if (collisionManager.isOnTheGround())
             {
                 saltando = false;
-            } else { saltando = true; }
+            }
+            else { saltando = true; }
 
-            if(TgcCollisionUtils.testAABBAABB(motorcycle.BoundingBox,lineaFin.BoundingBox))
+            if (TgcCollisionUtils.testAABBAABB(motorcycle.BoundingBox, lineaFin.BoundingBox))
             {
                 terminoJuego = true;
-                objetosColisionables.Clear();    
+                objetosColisionables.Clear();
             }
 
             if (terminoJuego)
@@ -565,11 +597,14 @@ namespace AlumnoEjemplos.MiGrupo
                 GuiController.Instance.ThirdPersonCamera.Target = lineaFin.Position;
                 textGanaste.render();
                 textGanaste2.render();
+                mejor_tiempo += tiempoTranscurrido;
+                motorcycle.move(0, 100, -150);
+               
             }
 
             ultimaNormal = collisionManager.Result.collisionNormal;
 
-            
+
             //TERMINA DEBUG
 
             //     if (anguloEntreVectores(original_rot, motorcycle.Rotation) > 0.45f || anguloEntreVectores(original_rot, motorcycle.Rotation) < -0.45f)
@@ -581,13 +616,17 @@ namespace AlumnoEjemplos.MiGrupo
             //     }
 
             //Renders
-            
-            //lineaFin.render();
+
+            textoContadorTiempo.Text = "Tiempo " + FormatearTiempo(tiempoTranscurrido += elapsedTime);
+            textoMejorTiempo.Text = "Record: " + FormatearTiempo(mejor_tiempo);
+
+            textoContadorTiempo.render();
+            textoMejorTiempo.render();
             piramid.render();
             motorcycle.render();
             scene.renderAll();
             skyBox.render();
-   
+
             if (showBB)
             {
                 collisionNormalArrow.render();

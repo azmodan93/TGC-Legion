@@ -125,7 +125,6 @@ namespace AlumnoEjemplos.MiGrupo
         /// </summary>
         public override void close()
         {
-
             if (estaCorriendoGame)
             {
                 game.close();

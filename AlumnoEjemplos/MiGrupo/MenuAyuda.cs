@@ -18,12 +18,10 @@ namespace AlumnoEjemplos.MiGrupo
         TgcText2d[] menuLineas;
         int inicialX = -(GuiController.Instance.Panel3d.Width / 2) + 100;
         int inicialY = (GuiController.Instance.Panel3d.Height / 2);
-        int distEntreLineas = 80;
+        int distEntreLineas = 50;
         int posCreditos = GuiController.Instance.Panel3d.Height / 2;
         int width = GuiController.Instance.Panel3d.Width;
         int height = GuiController.Instance.Panel3d.Height;
-        int largoDeLinea = 150;
-        int altoDeLinea = 38;
         public TgcD3dInput input;
 
         public MenuAyuda()
@@ -45,39 +43,39 @@ namespace AlumnoEjemplos.MiGrupo
             //Cargar Textos
             menuLineas[0].Text = "COMANDOS";
             menuLineas[0].Position = new Point(0, posCreditos - (4 * distEntreLineas));
-            menuLineas[0].changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
+            menuLineas[0].changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold | FontStyle.Bold));
 
             menuLineas[1].Text = "W - AVANZAR";
             menuLineas[1].Position = new Point(0, posCreditos - (3 * distEntreLineas));
-            menuLineas[1].changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
+            menuLineas[1].changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold | FontStyle.Bold));
 
             menuLineas[2].Text = "S - FRENAR/RETROCEDER";
             menuLineas[2].Position = new Point(0, posCreditos - 2*distEntreLineas);
-            menuLineas[2].changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
+            menuLineas[2].changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold | FontStyle.Bold));
 
             menuLineas[3].Text = "A - GIRAR HACIA ATRAS";
             menuLineas[3].Position = new Point(0, posCreditos - distEntreLineas);
-            menuLineas[3].changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
+            menuLineas[3].changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold | FontStyle.Bold));
 
             menuLineas[4].Text = "D - GIRAR HACIA ADELANTE";
             menuLineas[4].Position = new Point(0, posCreditos);
-            menuLineas[4].changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
+            menuLineas[4].changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold | FontStyle.Bold));
 
             menuLineas[6].Text = "P - DESTRABAR MOTO";
             menuLineas[6].Position = new Point(0, posCreditos +distEntreLineas);
-            menuLineas[6].changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
+            menuLineas[6].changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold | FontStyle.Bold));
 
             menuLineas[5].Text = "BACKSPACE - VOLVER A MENU INICIO";
             menuLineas[5].Position = new Point(0, posCreditos + (4 * distEntreLineas));
-            menuLineas[5].changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
+            menuLineas[5].changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold | FontStyle.Bold));
 
             menuLineas[7].Text = "C - IR A ULTIMO CHECKPOINT";
             menuLineas[7].Position = new Point(0, posCreditos + (2 * distEntreLineas));
-            menuLineas[7].changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
+            menuLineas[7].changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold | FontStyle.Bold));
 
             menuLineas[8].Text = "B - TOGGLE BOUNDING BOX";
             menuLineas[8].Position = new Point(0, posCreditos + (3 * distEntreLineas));
-            menuLineas[8].changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
+            menuLineas[8].changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold | FontStyle.Bold));
 
 
 
