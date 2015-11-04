@@ -84,6 +84,36 @@ namespace AlumnoEjemplos.MiGrupo
             menuCreditos = new MenuCreditos();
             menuAyuda = new MenuAyuda();
             game = new Game();
+
+            //Modifier para ver BoundingBox
+            GuiController.Instance.Modifiers.addBoolean("Collisions", "Collisions", true);
+
+            GuiController.Instance.Modifiers.addBoolean("HabilitarGravedad", "Habilitar Gravedad", true);
+
+            //Modifiers para desplazamiento del personaje
+            GuiController.Instance.Modifiers.addFloat("VelocidadMax", 0f, 100f, 20f);
+            GuiController.Instance.Modifiers.addFloat("Aceleracion", 0f, 10f, 4f);
+
+            GuiController.Instance.Modifiers.addFloat("Rozamiento", 0.1f, 2f, 0.1f);
+            GuiController.Instance.Modifiers.addFloat("VelocidadRotacion", 1f, 500f, 300f);
+            GuiController.Instance.Modifiers.addVertex3f("Gravedad", new Vector3(-50, -500, -50), new Vector3(50, 500, 50), new Vector3(0, -20f, 0));
+
+            GuiController.Instance.Modifiers.addFloat("SlideFactor", 0f, 10f, 1f);
+            GuiController.Instance.Modifiers.addFloat("Pendiente", 0f, 1f, 0.72f);
+            GuiController.Instance.UserVars.addVar("elapsedTime");
+            GuiController.Instance.UserVars.addVar("GravedadActual");
+
+            GuiController.Instance.UserVars.addVar("Movement");
+            GuiController.Instance.UserVars.addVar("Rotation");
+
+            GuiController.Instance.UserVars.addVar("AnguloZ");
+            GuiController.Instance.UserVars.addVar("AnguloY");
+
+            GuiController.Instance.UserVars.addVar("moveForward");
+            GuiController.Instance.UserVars.addVar("velIni");
+            GuiController.Instance.UserVars.addVar("aceleracion");
+            GuiController.Instance.UserVars.addVar("tiempoAcel");
+            GuiController.Instance.UserVars.addVar("tiempoDesce");
         }
 
         /// <summary>
@@ -97,8 +127,15 @@ namespace AlumnoEjemplos.MiGrupo
             Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
             TgcD3dInput d3dInput = GuiController.Instance.D3dInput;
 
-             //pantalla De Inicio
-             switch (estado)
+            if (d3dInput.keyPressed(Key.Q))
+            {
+                estado = EjemploAlumno.states.inicio;
+                game.close();
+                game = new Game();
+            }
+
+            //pantalla De Inicio
+            switch (estado)
             {
                 case states.inicio:
                     menuInicio.activar(ref estado);

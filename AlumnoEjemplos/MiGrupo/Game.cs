@@ -71,7 +71,7 @@ namespace AlumnoEjemplos.MiGrupo
         bool showBB;
 
         //tiempo
-        float mejor_tiempo = 0;
+        static float mejor_tiempo = 0;
         float tiempoTranscurrido = 0;
 
         bool terminoJuego = false;
@@ -120,7 +120,7 @@ namespace AlumnoEjemplos.MiGrupo
 
             //Cargar Textos
             textGanaste.Text = "FELICIDADES, HAS GANADO";
-            textGanaste2.Text = "APRETE I PARA VOLVER AL MENU";
+            textGanaste2.Text = "APRETE Q PARA VOLVER AL MENU";
             textGanaste.Position = new Point(0, 50);
             textGanaste2.Position = new Point(0, 100);
             textGanaste.changeFont(new System.Drawing.Font("TimesNewRoman", 23, FontStyle.Bold | FontStyle.Bold));
@@ -196,36 +196,8 @@ namespace AlumnoEjemplos.MiGrupo
             //La agrego como objeto colisionable
             objetosColisionables.Add(BoundingBoxCollider.fromBoundingBox(lineaInicio.BoundingBox));
 
-            //Modifier para ver BoundingBox
-            GuiController.Instance.Modifiers.addBoolean("Collisions", "Collisions", true);
-
             showBB = true;
-            GuiController.Instance.Modifiers.addBoolean("HabilitarGravedad", "Habilitar Gravedad", true);
-
-            //Modifiers para desplazamiento del personaje
-            GuiController.Instance.Modifiers.addFloat("VelocidadMax", 0f, 100f, 20f);
-            GuiController.Instance.Modifiers.addFloat("Aceleracion", 0f, 10f, 4f);
-
-            GuiController.Instance.Modifiers.addFloat("Rozamiento", 0.1f, 2f, 0.1f);
-            GuiController.Instance.Modifiers.addFloat("VelocidadRotacion", 1f, 500f, 300f);
-            GuiController.Instance.Modifiers.addVertex3f("Gravedad", new Vector3(-50, -500, -50), new Vector3(50, 500, 50), new Vector3(0, -20f, 0));
-
-            GuiController.Instance.Modifiers.addFloat("SlideFactor", 0f, 10f, 1f);
-            GuiController.Instance.Modifiers.addFloat("Pendiente", 0f, 1f, 0.72f);
-            GuiController.Instance.UserVars.addVar("elapsedTime");
-            GuiController.Instance.UserVars.addVar("GravedadActual");
-
-            GuiController.Instance.UserVars.addVar("Movement");
-            GuiController.Instance.UserVars.addVar("Rotation");
-
-            GuiController.Instance.UserVars.addVar("AnguloZ");
-            GuiController.Instance.UserVars.addVar("AnguloY");
-
-            GuiController.Instance.UserVars.addVar("moveForward");
-            GuiController.Instance.UserVars.addVar("velIni");
-            GuiController.Instance.UserVars.addVar("aceleracion");
-            GuiController.Instance.UserVars.addVar("tiempoAcel");
-            GuiController.Instance.UserVars.addVar("tiempoDesce");
+        
 
             //DEBUG
             //Crear linea para mostrar la direccion del movimiento del personaje
@@ -313,12 +285,7 @@ namespace AlumnoEjemplos.MiGrupo
             float rozamiento = (float)GuiController.Instance.Modifiers.getValue("Rozamiento");
             float velocidadRotacion = (float)GuiController.Instance.Modifiers.getValue("VelocidadRotacion");
             GuiController.Instance.UserVars.setValue("elapsedTime", TgcParserUtils.printFloat(elapsedTime));
-
-            if (d3dInput.keyPressed(Key.I))
-            {
-                estado = EjemploAlumno.states.inicio;
-            }
-
+            
             if (d3dInput.keyPressed(Key.B))
             {
                 showBB = !showBB;
@@ -597,7 +564,11 @@ namespace AlumnoEjemplos.MiGrupo
                 GuiController.Instance.ThirdPersonCamera.Target = lineaFin.Position;
                 textGanaste.render();
                 textGanaste2.render();
-                mejor_tiempo += tiempoTranscurrido;
+                if(mejor_tiempo == 0)
+                {
+                    mejor_tiempo = tiempoTranscurrido;
+                }
+                mejor_tiempo = Math.Min(mejor_tiempo, tiempoTranscurrido);
                 motorcycle.move(0, 100, -150);
                
             }
@@ -616,8 +587,11 @@ namespace AlumnoEjemplos.MiGrupo
             //     }
 
             //Renders
-
-            textoContadorTiempo.Text = "Tiempo " + FormatearTiempo(tiempoTranscurrido += elapsedTime);
+            if (!terminoJuego)
+            {
+                tiempoTranscurrido += elapsedTime;
+            }
+            textoContadorTiempo.Text = "Tiempo " + FormatearTiempo(tiempoTranscurrido);
             textoMejorTiempo.Text = "Record: " + FormatearTiempo(mejor_tiempo);
 
             textoContadorTiempo.render();
@@ -651,6 +625,7 @@ namespace AlumnoEjemplos.MiGrupo
             collisionNormalArrow.dispose();
             directionArrow.dispose();
             piramid.dispose();
+            GuiController.Instance.ThirdPersonCamera.rotateY(1.57f);
 
         }
 
