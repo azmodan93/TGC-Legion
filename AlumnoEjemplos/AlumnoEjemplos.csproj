@@ -91,6 +91,7 @@
     <Compile Include="MiGrupo\EjemploAlumno.cs" />
     <Compile Include="MiGrupo\ElipsoidCollisionManager.cs" />
     <Compile Include="MiGrupo\Game.cs" />
+    <Compile Include="MiGrupo\ShadowMap.cs" />
     <Compile Include="MiGrupo\MenuAyuda.cs" />
     <Compile Include="MiGrupo\MenuCreditos.cs" />
     <Compile Include="MiGrupo\MenuInicio.cs" />

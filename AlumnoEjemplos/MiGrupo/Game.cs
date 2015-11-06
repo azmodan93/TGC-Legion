@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using TgcViewer;
+using TgcViewer.Utils;
 using TgcViewer.Utils._2D;
 using TgcViewer.Utils.Collision.ElipsoidCollision;
 using TgcViewer.Utils.Input;
@@ -26,6 +27,7 @@ namespace AlumnoEjemplos.MiGrupo
         Vector3 ultimoCheck = new Vector3(0, -100, -150);
         //Herramientas Framework
         Microsoft.DirectX.Direct3D.Device d3dDevice;
+        
 
         //skybox
         TgcSkyBox skyBox;
@@ -76,9 +78,17 @@ namespace AlumnoEjemplos.MiGrupo
 
         bool terminoJuego = false;
 
+        //iluminacion
+        ShadowMap ojalaQueAnde;
+
         public Game()
         {
             d3dDevice = GuiController.Instance.D3dDevice;
+
+            d3dDevice.Transform.Projection =
+                Matrix.PerspectiveFovLH(Geometry.DegreeToRadian(45.0f),
+                TgcD3dDevice.aspectRatio, 1f, 5000000f);
+
             string texturesPath = GuiController.Instance.AlumnoEjemplosMediaDir + "skybox\\";
             TgcSceneLoader loader = new TgcSceneLoader();
             collisionManager = new ElipsoidCollisionManager();
@@ -106,12 +116,12 @@ namespace AlumnoEjemplos.MiGrupo
 
             //cargo la moto
             motorcycle = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "moto\\Moto2-TgcScene.xml").Meshes[0];
-            motorcycle.move(0, 100, -150);
+            motorcycle.move(-40, 100, -150);
 
             //cargo la piramide
             piramid = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "piramide\\piramide-TgcScene.xml").Meshes[0];
             piramid.Scale = new Vector3(5, 5, 5);
-            piramid.move(-225, -45, -13750);
+            piramid.move(-265, -45, -13750);
 
             //cargo texto ganaste
 
@@ -148,8 +158,8 @@ namespace AlumnoEjemplos.MiGrupo
 
             //camara
             GuiController.Instance.ThirdPersonCamera.Enable = true;
-            GuiController.Instance.ThirdPersonCamera.setCamera(motorcycle.Position, 10, 175);
-            GuiController.Instance.ThirdPersonCamera.rotateY(-1.57f);
+            GuiController.Instance.ThirdPersonCamera.setCamera(motorcycle.Position + new Vector3(0,0,-100), 10, 200);
+            GuiController.Instance.ThirdPersonCamera.rotateY(-0.7f);
 
             //creo la bounding elipsoid
 
@@ -196,7 +206,11 @@ namespace AlumnoEjemplos.MiGrupo
             //La agrego como objeto colisionable
             objetosColisionables.Add(BoundingBoxCollider.fromBoundingBox(lineaInicio.BoundingBox));
 
-            showBB = true;
+            showBB = false;
+
+
+            //iluminacion
+            ojalaQueAnde = new ShadowMap(scene, motorcycle);
         
 
             //DEBUG
@@ -218,19 +232,21 @@ namespace AlumnoEjemplos.MiGrupo
             collisionPoint = TgcBox.fromSize(new Vector3(4, 4, 4), Color.Red);
             //TERMINA DEBUG
 
+
         }
 
         public void inicializarSkybox(String texturesPath)
         {
             skyBox = new TgcSkyBox();
             skyBox.Center = new Vector3(0, 1000, -6000);
-            skyBox.Size = new Vector3(15000, 15000, 25000);
+            skyBox.Size = new Vector3(10000, 15000, 25000);
             skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Up, texturesPath + "top.jpg");
             skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Down, texturesPath + "down.jpg");
-            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Left, texturesPath + "left.jpg");
-            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Right, texturesPath + "right.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Left, texturesPath + "right.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Right, texturesPath + "left.jpg");
             skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Front, texturesPath + "back.jpg");
             skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Back, texturesPath + "front.jpg");
+            skyBox.SkyEpsilon = (0.5f);
             skyBox.updateValues();
         }
 
@@ -268,6 +284,7 @@ namespace AlumnoEjemplos.MiGrupo
 
         public void activar(ref AlumnoEjemplos.MiGrupo.EjemploAlumno.states estado, float elapsedTime)
         {
+
 
             TgcD3dInput d3dInput = GuiController.Instance.D3dInput;
 
@@ -521,7 +538,7 @@ namespace AlumnoEjemplos.MiGrupo
             GuiController.Instance.UserVars.setValue("AnguloZ", TgcParserUtils.printFloat(anguloEntreVectores(collisionManager.Result.collisionNormal, new Vector3(0, 0, 1))));
 
             //actualizo la camara
-            GuiController.Instance.ThirdPersonCamera.Target = motorcycle.Position;
+            GuiController.Instance.ThirdPersonCamera.Target = motorcycle.Position + new Vector3(0,0,-100);
 
             //DEBUG
             //Actualizar valores de la linea de movimiento
@@ -562,8 +579,7 @@ namespace AlumnoEjemplos.MiGrupo
             if (terminoJuego)
             {
                 GuiController.Instance.ThirdPersonCamera.Target = lineaFin.Position;
-                textGanaste.render();
-                textGanaste2.render();
+               
                 if(mejor_tiempo == 0)
                 {
                     mejor_tiempo = tiempoTranscurrido;
@@ -594,12 +610,12 @@ namespace AlumnoEjemplos.MiGrupo
             textoContadorTiempo.Text = "Tiempo " + FormatearTiempo(tiempoTranscurrido);
             textoMejorTiempo.Text = "Record: " + FormatearTiempo(mejor_tiempo);
 
-            textoContadorTiempo.render();
-            textoMejorTiempo.render();
-            piramid.render();
-            motorcycle.render();
-            scene.renderAll();
-            skyBox.render();
+
+
+          
+            ojalaQueAnde.activar(elapsedTime,textGanaste,textGanaste2,textoContadorTiempo,textoMejorTiempo,piramid,skyBox,terminoJuego);
+      //      motorcycle.render();
+           // scene.renderAll();
 
             if (showBB)
             {
@@ -614,18 +630,20 @@ namespace AlumnoEjemplos.MiGrupo
                     bb.render();
                 }
             }
+
         }
 
         public void close()
         {
-            motorcycle.dispose();
-            scene.disposeAll();
+            //motorcycle.dispose();
+            //scene.disposeAll();
+            ojalaQueAnde.close();
             skyBox.dispose();
             characterElipsoid.dispose();
             collisionNormalArrow.dispose();
             directionArrow.dispose();
             piramid.dispose();
-            GuiController.Instance.ThirdPersonCamera.rotateY(1.57f);
+            GuiController.Instance.ThirdPersonCamera.rotateY(0.7f);
 
         }
 

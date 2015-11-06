@@ -114,6 +114,12 @@ namespace AlumnoEjemplos.MiGrupo
             GuiController.Instance.UserVars.addVar("aceleracion");
             GuiController.Instance.UserVars.addVar("tiempoAcel");
             GuiController.Instance.UserVars.addVar("tiempoDesce");
+
+            float K = 300;
+            GuiController.Instance.Modifiers.addVertex3f("LightLookFrom", new Vector3(-K, -K, -K), new Vector3(K, K, K), new Vector3(80, 120, 0));
+            GuiController.Instance.Modifiers.addVertex3f("LightLookAt", new Vector3(-K, -K, -K), new Vector3(K, K, K), new Vector3(0, 0, 0));
+        
+
         }
 
         /// <summary>
@@ -124,6 +130,7 @@ namespace AlumnoEjemplos.MiGrupo
         /// <param name="elapsedTime">Tiempo en segundos transcurridos desde el último frame</param>
         public override void render(float elapsedTime)
         {
+
             Microsoft.DirectX.Direct3D.Device d3dDevice = GuiController.Instance.D3dDevice;
             TgcD3dInput d3dInput = GuiController.Instance.D3dInput;
 
