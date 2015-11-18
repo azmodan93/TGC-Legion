@@ -27,7 +27,7 @@ sampler2D diffuseMap = sampler_state
 
 
 #define SMAP_SIZE 1024
-#define EPSILON 0.05f
+#define EPSILON 0.01f
 
 float time = 0;
 
@@ -140,7 +140,7 @@ float4 PixScene(	float2 Tex : TEXCOORD0,
     float3 vLight = normalize( float3( vPos - g_vLightPos ) );
 	float cono = dot( vLight, g_vLightDir);
 	float4 K = 0.0;
-	if( cono > 0.5)
+	if( cono > 0.7)
     {
     
     	// coordenada de textura CT
@@ -151,11 +151,11 @@ float4 PixScene(	float2 Tex : TEXCOORD0,
 		float I = (tex2D( g_samShadow, CT) + EPSILON < vPosLight.z / vPosLight.w)? 0.0f: 1.0f;  
 		
 		// interpolacion standard bi-lineal del shadow map
-        // CT va de 0 a 1, lo multiplico x el tamaño de la textura
+        // CT va de 0 a 1, lo multiplico x el tamaÃ±o de la textura
         // la parte fraccionaria indica cuanto tengo que tomar del vecino 
         // conviene cuando el smap size = 256
-        // leo 4 valores
-		/*float2 vecino = frac( CT*SMAP_SIZE);
+       /* // leo 4 valores
+		float2 vecino = frac( CT*SMAP_SIZE);
 		float prof = vPosLight.z / vPosLight.w;
         float s0 = (tex2D( g_samShadow, float2(CT)) + EPSILON < prof)? 0.0f: 1.0f;  
         float s1 = (tex2D( g_samShadow, float2(CT) + float2(1.0/SMAP_SIZE,0)) 
@@ -164,24 +164,25 @@ float4 PixScene(	float2 Tex : TEXCOORD0,
 							+ EPSILON < prof)? 0.0f: 1.0f;  
         float s3 = (tex2D( g_samShadow, float2(CT) + float2(1.0/SMAP_SIZE,1.0/SMAP_SIZE)) 
 							+ EPSILON < prof)? 0.0f: 1.0f;  
-        float I = lerp( lerp( s0, s1, vecino.x ),lerp( s2, s3, vecino.x ),vecino.y);
-        */
+        float l = lerp( lerp( s0, s1, vecino.x ),lerp( s2, s3, vecino.x ),vecino.y);
         
+        */
+	
 		
-		/*
 		// anti-aliasing del shadow map
-        float I = 0;
+        float l = 0;
+	
         float r = 2;
         for(int i=-r;i<=r;++i)
 			for(int j=-r;j<=r;++j)
-				I += (tex2D( g_samShadow, CT + float2((float)i/SMAP_SIZE, (float)j/SMAP_SIZE) ) + EPSILON < vPosLight.z / vPosLight.w)? 0.0f: 1.0f;  
-		I /= (2*r+1)*(2*r+1);
-		*/
+				l += (tex2D( g_samShadow, CT + float2((float)i/SMAP_SIZE, (float)j/SMAP_SIZE) ) + EPSILON < vPosLight.z / vPosLight.w)? 0.0f: 1.0f;  
+		l /= (2*r+1)*(2*r+1);
 		
-	    if( cono < 0.8)
-			I*= 1-(0.8-cono)*10;
 		
-		K = I;
+	    if( cono < 0.5)
+			l*= 1-(0.5-cono)*10;
+		
+		K = l;
     }     
 		
 	float4 color_base = tex2D( diffuseMap, Tex);
