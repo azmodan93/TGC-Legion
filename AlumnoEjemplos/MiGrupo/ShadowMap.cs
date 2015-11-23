@@ -105,7 +105,7 @@ namespace AlumnoEjemplos.MiGrupo
             // animo la pos del avion
             if (!terminoJuego)
             {
-                g_LightPos = motorcycle.Position + new Vector3(-300, 75, 150);
+                g_LightPos = motorcycle.Position + 2f*(new Vector3(100, 60, 0));
                 g_LightDir = motorcycle.Position + (new Vector3(0, 0, 0)) - g_LightPos;
                 g_LightDir.Normalize();
             }

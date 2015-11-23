@@ -27,7 +27,7 @@ sampler2D diffuseMap = sampler_state
 
 
 #define SMAP_SIZE 1024
-#define EPSILON 0.01f
+#define EPSILON 0.05f
 
 float time = 0;
 
@@ -140,6 +140,8 @@ float4 PixScene(	float2 Tex : TEXCOORD0,
     float3 vLight = normalize( float3( vPos - g_vLightPos ) );
 	float cono = dot( vLight, g_vLightDir);
 	float4 K = 0.0;
+	float4 color_base = tex2D( diffuseMap, Tex);
+
 	if( cono > 0.7)
     {
     
@@ -183,10 +185,11 @@ float4 PixScene(	float2 Tex : TEXCOORD0,
 			l*= 1-(0.5-cono)*10;
 		
 		K = l;
-    }     
-		
-	float4 color_base = tex2D( diffuseMap, Tex);
-	color_base.rgb *= 0.5 + 0.5*K;
+
+    color_base.rgb *= 0.5 + 0.5*K;
+	
+	}
+
 	return color_base;	
 }	
 
