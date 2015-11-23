@@ -14,12 +14,14 @@ using TgcViewer.Utils.Input;
 using TgcViewer.Utils.Terrain;
 using TgcViewer.Utils.TgcGeometry;
 using TgcViewer.Utils.TgcSceneLoader;
+using TgcViewer.Utils.Ui;
 
 namespace AlumnoEjemplos.MiGrupo
 {
     public class Game
     {
-
+        TgcDrawer2D drawer;
+        
         //VARIABLES GLOBALES
 
         //checkpoints
@@ -81,8 +83,33 @@ namespace AlumnoEjemplos.MiGrupo
         //iluminacion
         ShadowMap ojalaQueAnde;
 
+
+        //sprites
+        TgcSprite mapita;
+        TgcSprite motoSprite;
+        float zAnterior = -150;
+        Size textureSize;
+        Size screenSize;
+        Size motoTextureSize;
         public Game()
         {
+            //sprites
+            mapita = new TgcSprite();
+            mapita.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\preview.png");
+            motoSprite = new TgcSprite();
+            motoSprite.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\dirtbike.png");
+
+            //Ubicarlo centrado en la pantalla
+            screenSize = GuiController.Instance.Panel3d.Size;
+            textureSize = mapita.Texture.Size;
+            motoTextureSize = motoSprite.Texture.Size;
+            mapita.Scaling = (new Vector2(0.7f, 0.7f));
+            motoSprite.Scaling = (new Vector2(0.5f, 0.5f));
+          
+            mapita.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize.Width*0.7f / 2, 0), 16);
+
+            motoSprite.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - motoTextureSize.Width *0.5f/ 2 - textureSize.Width *0.7f /2, 0), 8);
+
             d3dDevice = GuiController.Instance.D3dDevice;
 
             d3dDevice.Transform.Projection =
@@ -591,7 +618,6 @@ namespace AlumnoEjemplos.MiGrupo
 
             ultimaNormal = collisionManager.Result.collisionNormal;
 
-
             //TERMINA DEBUG
 
             //     if (anguloEntreVectores(original_rot, motorcycle.Rotation) > 0.45f || anguloEntreVectores(original_rot, motorcycle.Rotation) < -0.45f)
@@ -630,6 +656,23 @@ namespace AlumnoEjemplos.MiGrupo
                     bb.render();
                 }
             }
+
+
+            motoSprite.Position = motoSprite.Position + new Vector2(-(motorcycle.Position.Z - zAnterior)*textureSize.Width*0.7f/13200, 0);
+            
+
+          
+
+            //Iniciar dibujado de todos los Sprites de la escena (en este caso es solo uno)
+            GuiController.Instance.Drawer2D.beginDrawSprite();
+
+            //Dibujar sprite (si hubiese mas, deberian ir todos aquí)
+            mapita.render();
+            motoSprite.render();
+
+            //Finalizar el dibujado de Sprites
+            GuiController.Instance.Drawer2D.endDrawSprite();
+            zAnterior = motorcycle.Position.Z;
 
         }
 
