@@ -87,17 +87,37 @@ namespace AlumnoEjemplos.MiGrupo
         //sprites
         TgcSprite mapita;
         TgcSprite motoSprite;
+        TgcSprite timer;
         float zAnterior = -150;
         Size textureSize;
         Size screenSize;
         Size motoTextureSize;
+
+
+        static class Fuentes
+        {
+            //Coleccion con las fuentes
+            public static System.Drawing.Text.PrivateFontCollection fuente = new System.Drawing.Text.PrivateFontCollection();
+
+            //Carga las fuentes
+            public static void cargarFuentes()
+            {
+                fuente.AddFontFile(GuiController.Instance.AlumnoEjemplosMediaDir + "fonts\\24.ttf");
+
+            }
+        }
+
         public Game()
         {
+            Fuentes.cargarFuentes();
+
             //sprites
             mapita = new TgcSprite();
             mapita.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\preview.png");
             motoSprite = new TgcSprite();
             motoSprite.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\dirtbike.png");
+            timer = new TgcSprite();
+            timer.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\gate.png");
 
             //Ubicarlo centrado en la pantalla
             screenSize = GuiController.Instance.Panel3d.Size;
@@ -109,6 +129,10 @@ namespace AlumnoEjemplos.MiGrupo
             mapita.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize.Width*0.7f / 2, 0), 16);
 
             motoSprite.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - motoTextureSize.Width *0.5f/ 2 - textureSize.Width *0.7f /2, 0), 8);
+
+            timer.Position = new Vector2(screenSize.Width - 250, screenSize.Height - 125);
+
+            timer.Scaling = new Vector2(0.9f,0.8f);
 
             d3dDevice = GuiController.Instance.D3dDevice;
 
@@ -168,19 +192,19 @@ namespace AlumnoEjemplos.MiGrupo
 
             // Creo texto contador de tiempo
             textoContadorTiempo = new TgcText2d();
-            textoContadorTiempo.Color = Color.Red;
-            textoContadorTiempo.Align = TgcText2d.TextAlign.LEFT;
-            textoContadorTiempo.Position = new Point(0, 400); //(680, 400)
+            textoContadorTiempo.Color = Color.Black;
+            textoContadorTiempo.Align = TgcText2d.TextAlign.RIGHT;
+            textoContadorTiempo.Position = new Point(630, 400); //(680, 400)
             textoContadorTiempo.Size = new Size(300, 100);
-            textoContadorTiempo.changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold));
+            textoContadorTiempo.changeFont(new System.Drawing.Font(Fuentes.fuente.Families[0], 25, FontStyle.Regular));
 
             // Creo texto mejor tiempo
             textoMejorTiempo = new TgcText2d();
-            textoMejorTiempo.Color = Color.Red;
-            textoMejorTiempo.Align = TgcText2d.TextAlign.LEFT;
-            textoMejorTiempo.Position = new Point(0, 430);  //(680, 430)
+            textoMejorTiempo.Color = Color.Black;
+            textoMejorTiempo.Align = TgcText2d.TextAlign.RIGHT;
+            textoMejorTiempo.Position = new Point(630, 430);  //(680, 430)
             textoMejorTiempo.Size = new Size(300, 100);
-            textoMejorTiempo.changeFont(new System.Drawing.Font("TimesNewRoman", 18, FontStyle.Bold));
+            textoMejorTiempo.changeFont(new System.Drawing.Font(Fuentes.fuente.Families[0], 25, FontStyle.Regular));
             
 
             //camara
@@ -633,13 +657,14 @@ namespace AlumnoEjemplos.MiGrupo
             {
                 tiempoTranscurrido += elapsedTime;
             }
-            textoContadorTiempo.Text = "Tiempo " + FormatearTiempo(tiempoTranscurrido);
+            
+            textoContadorTiempo.Text = "Tiempo: " + FormatearTiempo(tiempoTranscurrido);
             textoMejorTiempo.Text = "Record: " + FormatearTiempo(mejor_tiempo);
 
 
 
           
-            ojalaQueAnde.activar(elapsedTime,textGanaste,textGanaste2,textoContadorTiempo,textoMejorTiempo,piramid,skyBox,terminoJuego);
+            ojalaQueAnde.activar(elapsedTime,textGanaste,textGanaste2,textoContadorTiempo,textoMejorTiempo,piramid,skyBox,terminoJuego,timer);
       //      motorcycle.render();
            // scene.renderAll();
 
@@ -665,13 +690,15 @@ namespace AlumnoEjemplos.MiGrupo
 
             //Iniciar dibujado de todos los Sprites de la escena (en este caso es solo uno)
             GuiController.Instance.Drawer2D.beginDrawSprite();
-
             //Dibujar sprite (si hubiese mas, deberian ir todos aquí)
+         
             mapita.render();
             motoSprite.render();
+            
 
             //Finalizar el dibujado de Sprites
             GuiController.Instance.Drawer2D.endDrawSprite();
+
             zAnterior = motorcycle.Position.Z;
 
         }

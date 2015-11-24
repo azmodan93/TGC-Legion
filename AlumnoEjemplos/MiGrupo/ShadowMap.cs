@@ -95,7 +95,7 @@ namespace AlumnoEjemplos.MiGrupo
 
         }
 
-        public void activar(float elapsedTime,TgcText2d textGanaste, TgcText2d textGanaste2,TgcText2d textoContadorTiempo,TgcText2d textoMejorTiempo,TgcMesh piramid, TgcSkyBox skyBox, bool terminoJuego)
+        public void activar(float elapsedTime,TgcText2d textGanaste, TgcText2d textGanaste2,TgcText2d textoContadorTiempo,TgcText2d textoMejorTiempo,TgcMesh piramid, TgcSkyBox skyBox, bool terminoJuego,TgcSprite tablero)
         {
             Device device = GuiController.Instance.D3dDevice;
             Control panel3d = GuiController.Instance.Panel3d;
@@ -130,6 +130,13 @@ namespace AlumnoEjemplos.MiGrupo
                 textGanaste.render();
                 textGanaste2.render();
             }
+
+            GuiController.Instance.Drawer2D.beginDrawSprite();
+            //Dibujar sprite (si hubiese mas, deberian ir todos aquí)
+            tablero.render();
+            //Finalizar el dibujado de Sprites
+            GuiController.Instance.Drawer2D.endDrawSprite();
+
             textoContadorTiempo.render();
             textoMejorTiempo.render();
             piramid.render();
