@@ -25,6 +25,9 @@ namespace AlumnoEjemplos.MiGrupo
         TgcScene scene;
         TgcMesh motorcycle;
 
+        //Relleno Fondo
+        TgcMesh pasto, arbol, roca, piramide, palmera;
+
         // Shadow map
         readonly int SHADOWMAP_SIZE = 1024;
         Texture g_pShadowMap;    // Texture to which the shadow map is rendered
@@ -43,11 +46,29 @@ namespace AlumnoEjemplos.MiGrupo
         {
 
             Device d3dDevice = GuiController.Instance.D3dDevice;
-            MyMediaDir = GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Media\\";
-            MyShaderDir = GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Shaders\\";
+            //MyMediaDir = GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Media\\";
+            //MyShaderDir = GuiController.Instance.ExamplesDir + "Shaders\\WorkshopShaders\\Shaders\\";
+
+            TgcSceneLoader loader = new TgcSceneLoader();
 
             scene = pistaMoto;
             motorcycle = altaMoto;
+
+            TgcScene scene2 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "Vegetacion\\Pasto\\Pasto-TgcScene.xml");
+            pasto = scene2.Meshes[0];
+            TgcScene scene3 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "Vegetacion\\ArbolSelvatico\\ArbolSelvatico-TgcScene.xml");
+            arbol = scene3.Meshes[0];
+            TgcScene scene4 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "Vegetacion\\Roca\\Roca-TgcScene.xml");
+            roca = scene4.Meshes[0];
+            TgcScene scene5 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "Vegetacion\\Piramide\\Piramide-TgcScene.xml");
+            piramide = scene5.Meshes[0];
+            TgcScene scene6 = loader.loadSceneFromFile(GuiController.Instance.AlumnoEjemplosMediaDir + "Vegetacion\\Palmera2\\Palmera2-TgcScene.xml");
+            palmera = scene6.Meshes[0];
+
+
+            piramide.Scale = new Vector3(7.0f, 7.0f, 7.0f);
+            
+            roca.Scale = new Vector3(4.0f, 4.0f, 4.0f);
 
             //Cargar Shader personalizado
             effect = TgcShaders.loadEffect(GuiController.Instance.AlumnoEjemplosMediaDir + "shaders\\ShadowMap.fx");
@@ -140,6 +161,7 @@ namespace AlumnoEjemplos.MiGrupo
             textoContadorTiempo.render();
             textoMejorTiempo.render();
             piramid.render();
+            renderEscena(elapsedTime);
             device.Transform.Projection =
                 Matrix.PerspectiveFovLH(Geometry.DegreeToRadian(45.0f),
                 TgcD3dDevice.aspectRatio, 1f, 20000f);
@@ -248,10 +270,59 @@ namespace AlumnoEjemplos.MiGrupo
             return matWorld;
         }
 
+        public void renderEscena(float elapsedTime)
+        {
+           
+            Random rnd = new Random((int)(FastMath.E/Math.Sinh(3*FastMath.PI_HALF)));
+            for (int i =-1; i < 0; ++i)
+                for (int j = 0; j < 68; ++j)
+                {
+                    pasto.Position = new Vector3(-i * 200 + rnd.Next(0, 50), 0, -j * 200 + rnd.Next(0, 50));
+                    pasto.Scale = new Vector3(3, 4 + rnd.Next(0, 4), 5);
+                    pasto.render();
+                }
+
+
+            for (int i = -1; i < 0; ++i)
+                for (int j = 0; j < 28; ++j)
+                {
+                    roca.Position = new Vector3(-i * 300 + rnd.Next(0, 50), 0, -j * 500 + rnd.Next(0, 50));
+                    roca.render();
+                }
+
+
+            for (int i = -1; i < 0; ++i)
+                for (int j = 0; j < 19; ++j)
+                {
+                    arbol.Position = new Vector3(-i * 400 + rnd.Next(0, 50), 0, -j * 750 + rnd.Next(0, 50));
+                    arbol.render();
+                }
+
+            for (int i = -1; i < 0; ++i)
+                for (int j = 0; j < 12; ++j)
+                {
+                   piramide.Position = new Vector3(-i * 800 + rnd.Next(0, 50), 0, -j * 1300 + rnd.Next(0, 50));
+                    piramide.render();
+                }
+
+            for (int i = -1; i < 0; ++i)
+                for (int j = 0; j < 23; ++j)
+                {
+                    palmera.Position = new Vector3(-i * 350 + rnd.Next(0, 50), 0, -j * 600 + rnd.Next(0, 50));
+                    palmera.render();
+                }
+
+        }
+
         public void close()
         {
             effect.Dispose();
             scene.disposeAll();
+            pasto.dispose();
+            palmera.dispose();
+            piramide.dispose();
+            arbol.dispose();
+            roca.dispose();
             motorcycle.dispose();
             g_pShadowMap.Dispose();
             g_pDSShadow.Dispose();
