@@ -67,6 +67,7 @@ namespace AlumnoEjemplos.MiGrupo
         TgcText2d textGanaste2;
         TgcText2d textoContadorTiempo;
         TgcText2d textoMejorTiempo;
+        TgcText2d textFPS;
 
         //Debug
         TgcArrow collisionNormalArrow;
@@ -85,13 +86,13 @@ namespace AlumnoEjemplos.MiGrupo
 
 
         //sprites
-       static TgcSprite mapita;
+        static TgcSprite mapita;
         static TgcSprite motoSprite;
-       static TgcSprite timer;
+        static TgcSprite timer;
         float zAnterior = -150;
-      static  Size textureSize;
-       static Size screenSize;
-    static    Size motoTextureSize;
+        static  Size textureSize;
+        static Size screenSize;
+        static Size motoTextureSize;
         static bool inicializo = false;
         static Vector2 posMotoInicial;
 
@@ -210,7 +211,12 @@ namespace AlumnoEjemplos.MiGrupo
             textoMejorTiempo.Position = new Point(630, 430);  //(680, 430)
             textoMejorTiempo.Size = new Size(300, 100);
             textoMejorTiempo.changeFont(new System.Drawing.Font(Fuentes.fuente.Families[0], 25, FontStyle.Regular));
-            
+
+            //Texto para mostrar fps
+            textFPS = new TgcText2d();
+            textFPS.Position = new Point((screenSize.Width / (-2)), 0);
+            textFPS.Text = "FPS: ";
+            textFPS.Color = Color.Yellow;
 
             //camara
             GuiController.Instance.ThirdPersonCamera.Enable = true;
@@ -669,7 +675,7 @@ namespace AlumnoEjemplos.MiGrupo
 
 
           
-            ojalaQueAnde.activar(elapsedTime,textGanaste,textGanaste2,textoContadorTiempo,textoMejorTiempo,piramid,skyBox,terminoJuego,timer);
+            ojalaQueAnde.activar(elapsedTime,textGanaste,textGanaste2,textoContadorTiempo,textoMejorTiempo,piramid,skyBox,terminoJuego,timer,textFPS);
       //      motorcycle.render();
            // scene.renderAll();
 
