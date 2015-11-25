@@ -85,14 +85,14 @@ namespace AlumnoEjemplos.MiGrupo
 
 
         //sprites
-        TgcSprite mapita;
-        TgcSprite motoSprite;
-        TgcSprite timer;
+       static TgcSprite mapita;
+        static TgcSprite motoSprite;
+       static TgcSprite timer;
         float zAnterior = -150;
-        Size textureSize;
-        Size screenSize;
-        Size motoTextureSize;
-
+      static  Size textureSize;
+       static Size screenSize;
+    static    Size motoTextureSize;
+        static bool inicializo = false;
 
         static class Fuentes
         {
@@ -112,28 +112,31 @@ namespace AlumnoEjemplos.MiGrupo
             Fuentes.cargarFuentes();
 
             //sprites
-            mapita = new TgcSprite();
-            mapita.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\preview.png");
-            motoSprite = new TgcSprite();
-            motoSprite.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\dirtbike.png");
-            timer = new TgcSprite();
-            timer.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\gate.png");
+            if (!inicializo)
+            {
+                mapita = new TgcSprite();
+                mapita.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\preview.png");
+                motoSprite = new TgcSprite();
+                motoSprite.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\dirtbike.png");
+                timer = new TgcSprite();
+                timer.Texture = TgcTexture.createTexture(GuiController.Instance.AlumnoEjemplosMediaDir + "\\sprites\\gate.png");
 
-            //Ubicarlo centrado en la pantalla
-            screenSize = GuiController.Instance.Panel3d.Size;
-            textureSize = mapita.Texture.Size;
-            motoTextureSize = motoSprite.Texture.Size;
-            mapita.Scaling = (new Vector2(0.7f, 0.7f));
-            motoSprite.Scaling = (new Vector2(0.5f, 0.5f));
-          
-            mapita.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize.Width*0.7f / 2, 0), 16);
+                //Ubicarlo centrado en la pantalla
+                screenSize = GuiController.Instance.Panel3d.Size;
+                textureSize = mapita.Texture.Size;
+                motoTextureSize = motoSprite.Texture.Size;
+                mapita.Scaling = (new Vector2(0.7f, 0.7f));
+                motoSprite.Scaling = (new Vector2(0.5f, 0.5f));
 
-            motoSprite.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - motoTextureSize.Width *0.5f/ 2 - textureSize.Width *0.7f /2, 0), 8);
+                mapita.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - textureSize.Width * 0.7f / 2, 0), 16);
 
-            timer.Position = new Vector2(screenSize.Width - 250, screenSize.Height - 125);
+                motoSprite.Position = new Vector2(FastMath.Max(screenSize.Width / 2 - motoTextureSize.Width * 0.5f / 2 - textureSize.Width * 0.7f / 2, 0), 8);
 
-            timer.Scaling = new Vector2(0.9f,0.8f);
+                timer.Position = new Vector2(screenSize.Width - 250, screenSize.Height - 125);
 
+                timer.Scaling = new Vector2(0.9f, 0.8f);
+                inicializo = true;
+            }
             d3dDevice = GuiController.Instance.D3dDevice;
 
             d3dDevice.Transform.Projection =
