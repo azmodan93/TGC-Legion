@@ -93,6 +93,7 @@ namespace AlumnoEjemplos.MiGrupo
        static Size screenSize;
     static    Size motoTextureSize;
         static bool inicializo = false;
+        static Vector2 posMotoInicial;
 
         static class Fuentes
         {
@@ -135,6 +136,7 @@ namespace AlumnoEjemplos.MiGrupo
                 timer.Position = new Vector2(screenSize.Width - 250, screenSize.Height - 125);
 
                 timer.Scaling = new Vector2(0.9f, 0.8f);
+                posMotoInicial = motoSprite.Position;
                 inicializo = true;
             }
             d3dDevice = GuiController.Instance.D3dDevice;
@@ -710,6 +712,7 @@ namespace AlumnoEjemplos.MiGrupo
         {
             //motorcycle.dispose();
             //scene.disposeAll();
+            motoSprite.Position = posMotoInicial;
             ojalaQueAnde.close();
             skyBox.dispose();
             characterElipsoid.dispose();
